@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cost_Center__c</fullName>
+    <description>Cost center code for financial tracking</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Enter the cost center code (40 characters max)</inlineHelpText>
+    <label>Cost Center</label>
+    <length>40</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

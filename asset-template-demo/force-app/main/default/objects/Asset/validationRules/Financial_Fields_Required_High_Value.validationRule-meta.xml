@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Financial_Fields_Required_High_Value</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    Purchase_Cost__c &gt; 10000,
+    OR(
+        ISBLANK(GL_Account__c),
+        ISBLANK(Cost_Center__c)
+    )
+)</errorConditionFormula>
+    <errorMessage>GL Account and Cost Center are required for assets over $10,000</errorMessage>
+</ValidationRule>

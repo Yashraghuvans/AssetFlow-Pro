@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Maintenance_Interval_Required</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+  ISPICKVAL(Asset_Category__c, &quot;Equipment&quot;),
+  ISBLANK(Maintenance_Interval_Days__c)
+)</errorConditionFormula>
+    <errorDisplayField>Maintenance_Interval_Days__c</errorDisplayField>
+    <errorMessage>Maintenance Interval is required for Equipment assets</errorMessage>
+</ValidationRule>

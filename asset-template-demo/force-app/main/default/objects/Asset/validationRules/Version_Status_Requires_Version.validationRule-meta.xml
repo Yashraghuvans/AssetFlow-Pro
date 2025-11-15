@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Version_Status_Requires_Version</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+    TEXT(Version_Status__c) &lt;&gt; &quot;Live&quot;,
+    ISBLANK(Version__c)
+)</errorConditionFormula>
+    <errorDisplayField>Version_Number__c</errorDisplayField>
+    <errorMessage>Version number is required when Version Status is set</errorMessage>
+</ValidationRule>
