@@ -9,10 +9,10 @@ import generateAssetsFromTemplate from '@salesforce/apex/AssetTemplateService.ge
  */
 export default class AssetTemplateGenerator extends NavigationMixin(LightningElement) {
     
-    // Public properties for Lightning App Builder
+    // Public properties for Lightning Page configuration
     @api showDescription;
-    @api defaultAssetType;
-    @api cardTitle;
+    @api cardTitle = 'Asset Template Generator';
+    @api defaultAssetType = '';
     
     // Form input properties
     selectedTemplateId = '';
@@ -138,10 +138,8 @@ export default class AssetTemplateGenerator extends NavigationMixin(LightningEle
             this.successMessage = `Successfully created ${assetIds.length} asset(s)!`;
             this.showToast('Success', this.successMessage, 'success');
             
-            // Navigate to the first created asset
-            if (assetIds.length > 0) {
-                this.navigateToRecord(assetIds[0]);
-            }
+            // Navigate to Assets list view to see all created assets
+            this.navigateToAssetsList();
             
             // Reset form after short delay
             setTimeout(() => {
@@ -200,16 +198,14 @@ export default class AssetTemplateGenerator extends NavigationMixin(LightningEle
     }
     
     /**
-     * Navigate to a record page
-     * @param {string} recordId - Salesforce record ID
+     * Navigate to Assets list view
      */
-    navigateToRecord(recordId) {
+    navigateToAssetsList() {
         this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
+            type: 'standard__objectPage',
             attributes: {
-                recordId: recordId,
                 objectApiName: 'Asset',
-                actionName: 'view'
+                actionName: 'list'
             }
         });
     }
