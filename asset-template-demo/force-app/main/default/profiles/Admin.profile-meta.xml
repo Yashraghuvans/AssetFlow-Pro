@@ -58,6 +58,9 @@
     <layoutAssignments>
         <layout>AssetTemplate__c-Asset Template Layout</layout>
     </layoutAssignments>
+    <layoutAssignments>
+        <layout>Asset-Asset Full Details</layout>
+    </layoutAssignments>
     <tabVisibilities>
         <tab>AssetTemplate__c</tab>
         <visibility>DefaultOn</visibility>
