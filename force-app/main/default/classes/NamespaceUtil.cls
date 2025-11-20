@@ -54,10 +54,19 @@ public with sharing class NamespaceUtil {
     /**
      * Get namespace-aware field API name using Schema describe
      * This is the most reliable method for managed packages
+     * Throws exception if field does not exist to prevent SOQL injection
      */
     public static String getAssetFieldName(String fieldName) {
+        if (String.isBlank(fieldName)) {
+            throw new AuraHandledException('Invalid Field: Field name cannot be blank');
+        }
+        
         try {
             Schema.SObjectType assetType = Schema.getGlobalDescribe().get('Asset');
+            if (assetType == null) {
+                throw new AuraHandledException('Invalid Object: Asset object not found');
+            }
+            
             Map<String, Schema.SObjectField> fieldMap = assetType.getDescribe().fields.getMap();
             
             // Try with namespace prefix first
@@ -66,16 +75,26 @@ public with sharing class NamespaceUtil {
                 return namespacedField;
             }
             
-            // Try without namespace
+            // Try without namespace (for standard fields or already namespaced)
             if (fieldMap.containsKey(fieldName)) {
                 return fieldName;
             }
             
-            // Field not found, return original
-            return fieldName;
+            // Try lowercase (field map keys are case-insensitive but let's be explicit)
+            String lowerFieldName = fieldName.toLowerCase();
+            if (fieldMap.containsKey(lowerFieldName)) {
+                return lowerFieldName;
+            }
+            
+            // Field not found - throw exception to prevent injection
+            throw new AuraHandledException('Invalid Field: ' + fieldName + ' does not exist on Asset object');
+            
+        } catch (AuraHandledException e) {
+            // Re-throw AuraHandledException as-is
+            throw e;
         } catch (Exception e) {
-            // Fallback to simple namespace prepending
-            return getFieldName(fieldName);
+            // Wrap other exceptions
+            throw new AuraHandledException('Error validating field ' + fieldName + ': ' + e.getMessage());
         }
     }
 }
