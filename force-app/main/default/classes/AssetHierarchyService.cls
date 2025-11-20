@@ -100,7 +100,7 @@ public with sharing class AssetHierarchyService {
     
     /**
      * Get all descendants of a parent asset
-     * Optimized to query all assets once and build hierarchy in memory
+     * Optimized for Large Data Volumes (LDV) with selective filters
      */
     public static List<Asset> getAllDescendants(Id parentAssetId) {
         // Check if we're approaching SOQL limits
@@ -113,45 +113,76 @@ public with sharing class AssetHierarchyService {
         Set<Id> processedIds = new Set<Id>();
         Set<Id> currentLevelIds = new Set<Id>{parentAssetId};
         
-        // Query all potential descendants in one query (limit to reasonable depth)
-        // This prevents multiple SOQL queries in a loop
-        String criticalityField = NamespaceUtil.getAssetFieldName('Criticality__c');
-        String conditionField = NamespaceUtil.getAssetFieldName('Condition__c');
-        
-        String query = 'SELECT Id, Name, ParentId, SerialNumber, ' + criticalityField + ', ' + conditionField + 
-                       ' FROM Asset WHERE ParentId != null WITH USER_MODE LIMIT 10000';
-        
-        List<Asset> allAssets = Database.query(query);
-        
-        // Build parent-to-children map
-        Map<Id, List<Asset>> parentToChildren = new Map<Id, List<Asset>>();
-        for (Asset a : allAssets) {
-            if (!parentToChildren.containsKey(a.ParentId)) {
-                parentToChildren.put(a.ParentId, new List<Asset>());
+        try {
+            // Get RootAssetId field if it exists
+            String rootAssetIdField = null;
+            try {
+                rootAssetIdField = NamespaceUtil.getAssetFieldName('Root_Asset_Id__c');
+            } catch (Exception e) {
+                // Root_Asset_Id__c field doesn't exist, will use status filter instead
+                System.debug('Root_Asset_Id__c field not found, using status filter');
             }
-            parentToChildren.get(a.ParentId).add(a);
-        }
-        
-        // Traverse hierarchy in memory (max 5 levels to prevent infinite loops)
-        Integer depth = 0;
-        
-        while (!currentLevelIds.isEmpty() && depth < MAX_HIERARCHY_DEPTH) {
-            Set<Id> nextLevelIds = new Set<Id>();
             
-            for (Id currentId : currentLevelIds) {
-                if (parentToChildren.containsKey(currentId)) {
-                    for (Asset child : parentToChildren.get(currentId)) {
-                        if (!processedIds.contains(child.Id)) {
-                            allDescendants.add(child);
-                            processedIds.add(child.Id);
-                            nextLevelIds.add(child.Id);
+            // Query all potential descendants with selective filters
+            // This prevents table scans in large orgs
+            String criticalityField = NamespaceUtil.getAssetFieldName('Criticality__c');
+            String conditionField = NamespaceUtil.getAssetFieldName('Condition__c');
+            
+            String query = 'SELECT Id, Name, ParentId, SerialNumber, ' + criticalityField + ', ' + conditionField + 
+                           ' FROM Asset WHERE ParentId != null';
+            
+            // Add selective filter based on available fields
+            if (rootAssetIdField != null) {
+                // If RootAssetId is populated, use it for better selectivity
+                query += ' AND ' + rootAssetIdField + ' = :parentAssetId';
+            } else {
+                // Otherwise, filter by active status to reduce row count
+                query += ' AND Status != \'Retired\' AND Status != \'Disposed\'';
+            }
+            
+            query += ' WITH USER_MODE LIMIT 10000';
+            
+            List<Asset> allAssets = Database.query(query);
+            
+            // Build parent-to-children map
+            Map<Id, List<Asset>> parentToChildren = new Map<Id, List<Asset>>();
+            for (Asset a : allAssets) {
+                if (!parentToChildren.containsKey(a.ParentId)) {
+                    parentToChildren.put(a.ParentId, new List<Asset>());
+                }
+                parentToChildren.get(a.ParentId).add(a);
+            }
+            
+            // Traverse hierarchy in memory (max 5 levels to prevent infinite loops)
+            Integer depth = 0;
+            
+            while (!currentLevelIds.isEmpty() && depth < MAX_HIERARCHY_DEPTH) {
+                Set<Id> nextLevelIds = new Set<Id>();
+                
+                for (Id currentId : currentLevelIds) {
+                    if (parentToChildren.containsKey(currentId)) {
+                        for (Asset child : parentToChildren.get(currentId)) {
+                            if (!processedIds.contains(child.Id)) {
+                                allDescendants.add(child);
+                                processedIds.add(child.Id);
+                                nextLevelIds.add(child.Id);
+                            }
                         }
                     }
                 }
+                
+                currentLevelIds = nextLevelIds;
+                depth++;
             }
             
-            currentLevelIds = nextLevelIds;
-            depth++;
+        } catch (QueryException e) {
+            // Handle query timeout or other query exceptions gracefully
+            System.debug(LoggingLevel.ERROR, 'Query exception in getAllDescendants: ' + e.getMessage());
+            // Return partial results if any were collected
+            return allDescendants;
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Error in getAllDescendants: ' + e.getMessage());
+            return new List<Asset>();
         }
         
         return allDescendants;
