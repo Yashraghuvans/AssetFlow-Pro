@@ -52,19 +52,25 @@ public with sharing class AssetDashboardController {
     public static Map<String, Integer> getAssetsByCriticality(FilterParams filters) {
         Map<String, Integer> criticalityMap = new Map<String, Integer>();
         
-        String criticalityField = NamespaceUtil.getAssetFieldName('Criticality__c');
-        String query = 'SELECT ' + criticalityField + ', COUNT(Id) cnt FROM Asset';
-        Map<String, Object> bindVars = new Map<String, Object>();
-        String whereClause = buildWhereClause(filters, bindVars);
-        if (whereClause != '') {
-            query += ' WHERE ' + whereClause;
-        }
-        query += ' GROUP BY ' + criticalityField + ' WITH USER_MODE';
-        
-        for (AggregateResult ar : Database.queryWithBinds(query, bindVars, AccessLevel.USER_MODE)) {
-            String criticality = (String) ar.get(criticalityField);
-            Integer count = (Integer) ar.get('cnt');
-            criticalityMap.put(criticality != null ? criticality : 'Not Set', count);
+        try {
+            String criticalityField = NamespaceUtil.getAssetFieldName('Criticality__c');
+            String query = 'SELECT ' + criticalityField + ', COUNT(Id) cnt FROM Asset';
+            Map<String, Object> bindVars = new Map<String, Object>();
+            String whereClause = buildWhereClause(filters, bindVars);
+            if (whereClause != '') {
+                query += ' WHERE ' + whereClause;
+            }
+            query += ' GROUP BY ' + criticalityField + ' WITH USER_MODE';
+            
+            for (AggregateResult ar : Database.queryWithBinds(query, bindVars, AccessLevel.USER_MODE)) {
+                String criticality = (String) ar.get(criticalityField);
+                Integer count = (Integer) ar.get('cnt');
+                criticalityMap.put(criticality != null ? criticality : 'Not Set', count);
+            }
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuraHandledException('Error retrieving assets by criticality: ' + e.getMessage());
         }
         
         return criticalityMap;
