@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .greeting { font-size: 16px; margin-bottom: 20px; }
+        .rejection-message { background: #ffebee; border-left: 4px solid #E74C3C; padding: 15px; margin: 20px 0; border-radius: 4px; color: #c62828; font-weight: 600; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #E74C3C; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #E74C3C; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .info-table tr:last-child td { border-bottom: none; }
+        .reason-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .next-steps-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .next-steps-box ul { margin: 10px 0; padding-left: 20px; }
+        .next-steps-box li { margin: 5px 0; }
+        .button { display: inline-block; padding: 12px 30px; background: #E74C3C; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .button:hover { background: #C0392B; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❌ ASSET REJECTED</h1>
+            <p>Approval Request Declined</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello,
+            </div>
+            
+            <div class="rejection-message">
+                Your asset approval request has been rejected and requires your attention.
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Asset Details</div>
+                <table class="info-table">
+                    <tr>
+                        <td>Asset Name:</td>
+                        <td><strong>{!Asset.Name}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Purchase Cost:</td>
+                        <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td><span style="color: #E74C3C; font-weight: 600;">Rejected</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="reason-box">
+                <strong>Rejection Reason:</strong>
+                <p style="margin: 10px 0 0 0;">{!ApprovalRequest.Comments}</p>
+            </div>
+            
+            <div class="next-steps-box">
+                <strong>Next Steps:</strong>
+                <ul>
+                    <li>Review the rejection reason carefully</li>
+                    <li>Make necessary corrections to the asset record</li>
+                    <li>Ensure GL Account and Cost Center are properly assigned</li>
+                    <li>Resubmit the asset for approval once corrections are made</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">View & Edit Asset</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from the Asset Management System.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

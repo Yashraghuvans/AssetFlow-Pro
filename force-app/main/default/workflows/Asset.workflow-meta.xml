@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Asset_Approved_Email</fullName>
+        <description>Notifies submitter that their asset has been approved</description>
+        <protected>false</protected>
+        <recipients>
+            <type>creator</type>
+        </recipients>
+        <recipients>
+            <type>owner</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/Asset_Approved_Notification</template>
+    </alerts>
+    <alerts>
+        <fullName>Asset_Rejected_Email</fullName>
+        <description>Notifies submitter that their asset was rejected</description>
+        <protected>false</protected>
+        <recipients>
+            <type>creator</type>
+        </recipients>
+        <recipients>
+            <type>owner</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/Asset_Rejected_Notification</template>
+    </alerts>
+    <alerts>
+        <fullName>Asset_Submitted_Email</fullName>
+        <description>Notifies submitter that their asset is pending approval</description>
+        <protected>false</protected>
+        <recipients>
+            <type>creator</type>
+        </recipients>
+        <recipients>
+            <type>owner</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/Asset_Submitted_Notification</template>
+    </alerts>
+    <fieldUpdates>
+        <fullName>Set_Approval_Date</fullName>
+        <description>Sets the approval date to today when asset is approved</description>
+        <field>Approval_Date__c</field>
+        <formula>TODAY()</formula>
+        <name>Set Approval Date</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Formula</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Set_Status_Active</fullName>
+        <description>Sets asset status to Active after final approval</description>
+        <field>Status</field>
+        <literalValue>Active</literalValue>
+        <name>Set Status Active</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Set_Status_Pending</fullName>
+        <description>Sets asset status to Pending Approval when submitted</description>
+        <field>Status</field>
+        <literalValue>Pending Approval</literalValue>
+        <name>Set Status Pending</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Set_Status_Rejected</fullName>
+        <description>Sets asset status to Rejected when approval is denied</description>
+        <field>Status</field>
+        <literalValue>Rejected</literalValue>
+        <name>Set Status Rejected</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+</Workflow>

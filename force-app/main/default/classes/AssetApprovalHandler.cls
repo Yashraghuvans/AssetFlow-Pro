@@ -1,9 +1,12 @@
 /**
  * @description Handler class for Asset trigger to manage approval process submission
  * @author Salesforce Technical Architect
- * @date 2025-11-16
+ * @date 2025-11-17
  */
-public without sharing class AssetApprovalHandler {
+public with sharing class AssetApprovalHandler {
+    
+    // Recursion prevention
+    private static Boolean hasRun = false;
     
     // Threshold for high-value assets
     private static final Decimal HIGH_VALUE_THRESHOLD = 10000;
@@ -24,6 +27,12 @@ public without sharing class AssetApprovalHandler {
         Boolean isInsert,
         Boolean isUpdate
     ) {
+        // Prevent recursion
+        if (hasRun) {
+            return;
+        }
+        hasRun = true;
+        
         // List to hold approval submission requests
         List<Approval.ProcessSubmitRequest> requestList = new List<Approval.ProcessSubmitRequest>();
         

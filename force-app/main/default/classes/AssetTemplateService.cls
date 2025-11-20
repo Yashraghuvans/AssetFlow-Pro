@@ -88,7 +88,7 @@ public with sharing class AssetTemplateService {
     // ========== PRIVATE HELPER METHODS ==========
     
     /**
-     * Validates all input parameters
+     * Validates all input parameters with enhanced validation
      */
     private static void validateInputs(Id templateId, Integer quantity, String sitePrefix, Integer startNumber) {
         if (templateId == null) {
@@ -103,8 +103,18 @@ public with sharing class AssetTemplateService {
             throw new AuraHandledException('Site prefix is required.');
         }
         
+        // Validate site prefix format (alphanumeric and hyphens only, max 20 chars)
+        Pattern sitePrefixPattern = Pattern.compile('^[A-Za-z0-9-]{1,20}$');
+        if (!sitePrefixPattern.matcher(sitePrefix).matches()) {
+            throw new AuraHandledException('Site prefix must be alphanumeric with hyphens only (max 20 characters).');
+        }
+        
         if (startNumber == null || startNumber < 0) {
             throw new AuraHandledException('Start number must be a positive integer.');
+        }
+        
+        if (startNumber > 9999) {
+            throw new AuraHandledException('Start number must be less than 10000.');
         }
     }
     

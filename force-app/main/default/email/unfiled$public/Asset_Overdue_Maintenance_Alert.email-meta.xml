@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
     <available>true</available>
-    <description>Alert sent when an asset's maintenance becomes overdue.</description>
     <encodingKey>UTF-8</encodingKey>
     <name>Asset Overdue Maintenance Alert</name>
     <style>none</style>
-    <subject>URGENT: Asset Maintenance Overdue</subject>
+    <subject>Asset Maintenance Overdue: {!Asset.Name}</subject>
+    <textOnly>true</textOnly>
     <type>text</type>
-    <uiType>Aloha</uiType>
 </EmailTemplate>

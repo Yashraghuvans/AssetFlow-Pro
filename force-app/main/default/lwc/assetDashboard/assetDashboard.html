@@ -15,6 +15,85 @@
                 <lightning-spinner alternative-text="Loading dashboard..." size="medium"></lightning-spinner>
             </template>
             
+            <!-- Dashboard Filters -->
+            <template if:false={isLoading}>
+                <div class="filter-section slds-box slds-m-bottom_medium">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-1">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">
+                                <lightning-icon icon-name="utility:filterList" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                Dashboard Filters
+                            </h3>
+                        </div>
+                        
+                        <!-- Site Filter -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                            <lightning-dual-listbox
+                                name="siteFilter"
+                                label="Site"
+                                source-label="Available Sites"
+                                selected-label="Selected Sites"
+                                options={siteOptions}
+                                value={selectedSites}
+                                onchange={handleSiteChange}
+                                field-level-help="Filter assets by site location">
+                            </lightning-dual-listbox>
+                        </div>
+                        
+                        <!-- Date Range Filter -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                            <div class="date-range-wrapper">
+                                <label class="slds-form-element__label">Installation Date Range</label>
+                                <lightning-input
+                                    type="date"
+                                    name="startDate"
+                                    label="From Date"
+                                    value={startDate}
+                                    onchange={handleStartDateChange}
+                                    class="slds-m-bottom_x-small">
+                                </lightning-input>
+                                <lightning-input
+                                    type="date"
+                                    name="endDate"
+                                    label="To Date"
+                                    value={endDate}
+                                    onchange={handleEndDateChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                        
+                        <!-- Criticality Filter -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                            <lightning-dual-listbox
+                                name="criticalityFilter"
+                                label="Criticality"
+                                source-label="Available Levels"
+                                selected-label="Selected Levels"
+                                options={criticalityOptions}
+                                value={selectedCriticalities}
+                                onchange={handleCriticalityChange}
+                                field-level-help="Filter assets by criticality level">
+                            </lightning-dual-listbox>
+                        </div>
+                        
+                        <!-- Filter Actions -->
+                        <div class="slds-col slds-size_1-of-1 slds-text-align_right slds-m-top_small">
+                            <lightning-button
+                                label="Clear All Filters"
+                                onclick={handleClearFilters}
+                                variant="neutral"
+                                class="slds-m-right_x-small">
+                            </lightning-button>
+                            <lightning-button
+                                label="Apply Filters"
+                                onclick={handleApplyFilters}
+                                variant="brand">
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            
             <!-- Key Metrics Cards -->
             <template if:false={isLoading}>
                 <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_large">
@@ -31,7 +110,7 @@
                         </a>
                     </div>
                     
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 hide-on-mobile">
                         <a onclick={navigateToActiveAssets} class="metric-card-link">
                             <div class="metric-card slds-box slds-theme_success clickable">
                                 <div class="metric-icon slds-text-align_center">
@@ -70,7 +149,7 @@
                         </a>
                     </div>
                     
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 hide-on-mobile">
                         <div class="metric-card slds-box slds-theme_info">
                             <div class="metric-icon slds-text-align_center">
                                 <lightning-icon icon-name="utility:moneybag" size="small" variant="inverse"></lightning-icon>
@@ -112,8 +191,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Component 6: Assets by Condition (Funnel) -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <!-- Component 6: Assets by Condition (Funnel) - Hidden on mobile -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Assets by Condition">
                             <template if:true={conditionChartConfig}>
                                 <div class="chart-wrapper">
@@ -126,8 +205,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Component 7: Version Status (Gauge) -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <!-- Component 7: Version Status (Gauge) - Hidden on mobile -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Version Status">
                             <template if:true={versionChartConfig}>
                                 <div class="chart-wrapper">
@@ -140,8 +219,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Maintenance Status Overview -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <!-- Maintenance Status Overview - Hidden on mobile -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Maintenance Status Overview">
                             <template if:true={maintenanceChartConfig}>
                                 <div class="chart-wrapper">
@@ -154,8 +233,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Component 8: Top 10 Expensive Assets (Table) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <!-- Component 8: Top 10 Expensive Assets (Table) - Hidden on mobile (too wide) -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Top 10 Expensive Assets" icon-name="standard:currency">
                             <div slot="actions">
                                 <lightning-button 
@@ -183,8 +262,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Component 9: Assets Needing Maintenance Schedule (Table) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <!-- Component 9: Assets Needing Maintenance Schedule (Table) - Hidden on mobile (too wide) -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Assets Needing Maintenance Schedule" icon-name="standard:maintenance_plan">
                             <div slot="actions">
                                 <lightning-button 
@@ -213,8 +292,8 @@
                         </lightning-card>
                     </div>
                     
-                    <!-- Component 10: Asset Value by Site (Stacked Bars) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <!-- Component 10: Asset Value by Site (Stacked Bars) - Hidden on mobile -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
                         <lightning-card title="Asset Value by Site">
                             <template if:true={siteValueChartConfig}>
                                 <div class="chart-wrapper">

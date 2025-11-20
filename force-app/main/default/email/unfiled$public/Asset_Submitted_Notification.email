@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .info-badge { background: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; text-align: center; font-weight: 600; margin-bottom: 20px; border: 1px solid #ffeaa7; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .button { display: inline-block; padding: 12px 30px; background: #0070d2; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏳ ASSET PENDING APPROVAL</h1>
+            <p>Your asset has been submitted</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-badge">
+                ⏰ Your asset is pending approval and will be reviewed shortly.
+            </div>
+            
+            <p>Hello,</p>
+            
+            <p>Your high-value asset has been successfully submitted for approval. The Finance team will review it and you'll be notified once a decision is made.</p>
+            
+            <table class="info-table">
+                <tr>
+                    <td>Asset Name:</td>
+                    <td><strong>{!Asset.Name}</strong></td>
+                </tr>
+                <tr>
+                    <td>Purchase Cost:</td>
+                    <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                </tr>
+                <tr>
+                    <td>GL Account:</td>
+                    <td>{!Asset.GL_Account__c}</td>
+                </tr>
+                <tr>
+                    <td>Cost Center:</td>
+                    <td>{!Asset.Cost_Center__c}</td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td><strong>Pending Approval</strong></td>
+                </tr>
+            </table>
+            
+            <p><strong>What happens next?</strong></p>
+            <ul>
+                <li>Finance Manager will review the asset details</li>
+                <li>If the purchase cost exceeds $50,000, Asset Manager will also review</li>
+                <li>You'll receive an email notification once approved or rejected</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">View Asset</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from the Asset Management System.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+.stat-card {
+    background: #f3f3f3;
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+    border-left: 4px solid #0176d3;
+}
+
+.stat-card.attention {
+    border-left-color: #fe9339;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #706e6b;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #080707;
+}
+
+.parent-row {
+    background-color: #e3f2fd !important;
+    font-weight: bold;
+    padding-left: 0.5rem;
+}
+
+.child-row {
+    background-color: #ffffff !important;
+    padding-left: 2rem;
+}
+
+.legend-item {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+}
+
+lightning-datatable {
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+}

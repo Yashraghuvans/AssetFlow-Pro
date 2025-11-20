@@ -53,3 +53,54 @@
 .chart-large {
     min-height: 400px;
 }
+
+.filter-section {
+    background-color: #f3f3f3;
+    border-radius: 0.25rem;
+    padding: 1rem;
+}
+
+.date-range-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Mobile responsive settings */
+@media (max-width: 768px) {
+    /* Hide detailed tables on mobile - too wide */
+    .hide-on-mobile {
+        display: none !important;
+    }
+    
+    /* Simplify metric cards on mobile */
+    .metric-card {
+        min-height: 120px;
+        padding: 0.75rem;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+    }
+    
+    .metric-subtitle {
+        font-size: 0.7rem;
+    }
+    
+    /* Adjust chart sizes for mobile */
+    .chart-wrapper {
+        min-height: 200px;
+    }
+    
+    .chart-large {
+        min-height: 300px;
+    }
+    
+    /* Stack filter controls vertically on mobile */
+    .filter-section .slds-col {
+        margin-bottom: 0.5rem;
+    }
+}

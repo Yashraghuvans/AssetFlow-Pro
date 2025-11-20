@@ -1,0 +1,97 @@
+<template>
+    <lightning-card title="Asset Hierarchy Report" icon-name="standard:asset_object">
+        <div slot="actions">
+            <lightning-button 
+                label="Refresh" 
+                icon-name="utility:refresh" 
+                onclick={handleRefresh}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <lightning-button 
+                label="Export CSV" 
+                icon-name="utility:download" 
+                onclick={handleExport}>
+            </lightning-button>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="slds-p-around_medium">
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Parent Assets</div>
+                        <div class="stat-value">{formattedStats.totalParents}</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Child Assets</div>
+                        <div class="stat-value">{formattedStats.totalChildren}</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Children per Parent</div>
+                        <div class="stat-value">{formattedStats.avgChildren}</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Asset Value</div>
+                        <div class="stat-value">{formattedStats.totalValue}</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
+                    <div class="stat-card attention">
+                        <div class="stat-label">Requiring Attention</div>
+                        <div class="stat-value">{formattedStats.assetsRequiringAttention}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={hierarchyData}>
+                    <lightning-datatable
+                        key-field="id"
+                        data={hierarchyData}
+                        columns={columns}
+                        hide-checkbox-column
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </template>
+
+                <template if:true={error}>
+                    <div class="slds-text-color_error slds-p-around_medium">
+                        Error loading data: {error.body.message}
+                    </div>
+                </template>
+            </template>
+        </div>
+
+        <!-- Legend -->
+        <div slot="footer" class="slds-p-around_medium">
+            <div class="slds-text-title_caps slds-m-bottom_x-small">Legend:</div>
+            <div class="slds-grid slds-wrap slds-gutters_x-small">
+                <div class="slds-col">
+                    <span class="legend-item parent-row">Parent Asset</span>
+                </div>
+                <div class="slds-col">
+                    <span class="legend-item child-row">Child Asset</span>
+                </div>
+                <div class="slds-col">
+                    <span class="legend-item slds-text-color_error">Critical</span>
+                </div>
+                <div class="slds-col">
+                    <span class="legend-item slds-theme_warning">Poor Condition</span>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

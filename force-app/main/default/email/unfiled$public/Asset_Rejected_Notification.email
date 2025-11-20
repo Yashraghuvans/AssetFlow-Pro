@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #c23934 0%, #d9534f 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .warning-badge { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; text-align: center; font-weight: 600; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .rejection-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .button { display: inline-block; padding: 12px 30px; background: #0070d2; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❌ ASSET REJECTED</h1>
+            <p>Your asset approval was denied</p>
+        </div>
+        
+        <div class="content">
+            <div class="warning-badge">
+                Your asset approval request has been rejected.
+            </div>
+            
+            <p>Hello,</p>
+            
+            <p>Unfortunately, your high-value asset approval request has been rejected. Please review the rejection reason below and make necessary corrections before resubmitting.</p>
+            
+            <table class="info-table">
+                <tr>
+                    <td>Asset Name:</td>
+                    <td><strong>{!Asset.Name}</strong></td>
+                </tr>
+                <tr>
+                    <td>Purchase Cost:</td>
+                    <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                </tr>
+                <tr>
+                    <td>GL Account:</td>
+                    <td>{!Asset.GL_Account__c}</td>
+                </tr>
+                <tr>
+                    <td>Cost Center:</td>
+                    <td>{!Asset.Cost_Center__c}</td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td><strong>Rejected</strong></td>
+                </tr>
+            </table>
+            
+            <div class="rejection-box">
+                <strong>Rejection Reason:</strong><br/>
+                {!ApprovalRequest.Comments}
+            </div>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ul>
+                <li>Review the rejection comments above</li>
+                <li>Make necessary corrections to the asset record</li>
+                <li>Resubmit for approval when ready</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">Edit Asset</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from the Asset Management System.</p>
+        </div>
+    </div>
+</body>
+</html>

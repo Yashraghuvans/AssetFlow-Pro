@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4BCA81 0%, #3BA76A 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .greeting { font-size: 16px; margin-bottom: 20px; }
+        .success-message { background: #e8f5e9; border-left: 4px solid #4BCA81; padding: 15px; margin: 20px 0; border-radius: 4px; color: #2e7d32; font-weight: 600; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #4BCA81; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #4BCA81; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .info-table tr:last-child td { border-bottom: none; }
+        .button { display: inline-block; padding: 12px 30px; background: #4BCA81; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .button:hover { background: #3BA76A; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ ASSET APPROVED</h1>
+            <p>Approval Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello,
+            </div>
+            
+            <div class="success-message">
+                🎉 Congratulations! Your asset has been approved and is now active.
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Asset Details</div>
+                <table class="info-table">
+                    <tr>
+                        <td>Asset Name:</td>
+                        <td><strong>{!Asset.Name}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Purchase Cost:</td>
+                        <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td><span style="color: #4BCA81; font-weight: 600;">Approved</span></td>
+                    </tr>
+                    <tr>
+                        <td>Approval Date:</td>
+                        <td>{!Asset.Approval_Date__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Approved By:</td>
+                        <td>{!Asset.Approved_By__c}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <strong>Next Steps:</strong><br>
+                Your asset is now active and ready for use. You can view the complete asset details and history by clicking the button below.
+            </p>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">View Asset Details</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from the Asset Management System.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -160,7 +160,6 @@ export default class AssetVersionTransition extends LightningElement {
             
             this.closeModal(true);
         } catch (error) {
-            console.error('Error in handleFinish:', error);
             let errorMessage = 'An unknown error occurred';
             
             if (error.body) {
@@ -184,7 +183,15 @@ export default class AssetVersionTransition extends LightningElement {
     closeModal(refresh = false) {
         this.dispatchEvent(new CloseActionScreenEvent());
         if (refresh) {
-            eval("$A.get('e.force:refreshView').fire();");
+            // Use standard navigation to refresh the page
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this.recordId,
+                    objectApiName: 'Asset',
+                    actionName: 'view'
+                }
+            });
         }
     }
     

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #0070d2 0%, #1589ee 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .greeting { font-size: 16px; margin-bottom: 20px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #0070d2; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #0070d2; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .info-table tr:last-child td { border-bottom: none; }
+        .action-box { background: #f8f9fa; border-left: 4px solid #0070d2; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .action-box ul { margin: 10px 0; padding-left: 20px; }
+        .action-box li { margin: 5px 0; }
+        .button { display: inline-block; padding: 12px 30px; background: #0070d2; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .button:hover { background: #005fb2; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+        .divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 ASSET APPROVAL REQUIRED</h1>
+            <p>High-Value Asset Review</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello,
+            </div>
+            
+            <p>A high-value asset requires your approval. Please review the details below and take appropriate action.</p>
+            
+            <div class="section">
+                <div class="section-title">Asset Details</div>
+                <table class="info-table">
+                    <tr>
+                        <td>Asset Name:</td>
+                        <td><strong>{!Asset.Name}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Purchase Cost:</td>
+                        <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Current Value:</td>
+                        <td>{!Asset.Current_Value__c}</td>
+                    </tr>
+                    <tr>
+                        <td>GL Account:</td>
+                        <td>{!Asset.GL_Account__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Cost Center:</td>
+                        <td>{!Asset.Cost_Center__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Warranty Expiration:</td>
+                        <td>{!Asset.Warranty_Expiration__c}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Financial Information</div>
+                <table class="info-table">
+                    <tr>
+                        <td>Status:</td>
+                        <td>{!Asset.Status}</td>
+                    </tr>
+                    <tr>
+                        <td>Site:</td>
+                        <td>{!Asset.Site__c}</td>
+                    </tr>
+                    <tr>
+                        <td>Criticality:</td>
+                        <td>{!Asset.Criticality__c}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="action-box">
+                <strong>Approval Actions:</strong>
+                <ul>
+                    <li>✅ <strong>Approve</strong> if all financial information is correct</li>
+                    <li>❌ <strong>Reject</strong> if GL Account or Cost Center needs correction</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">View Asset Details</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated approval request from the Asset Management System.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

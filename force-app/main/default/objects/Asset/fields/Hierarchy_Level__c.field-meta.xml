@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Hierarchy_Level__c</fullName>
+    <description>Indicates the level of the asset in the hierarchy (0 = parent, 1 = child, 2 = grandchild, etc.)</description>
+    <externalId>false</externalId>
+    <label>Hierarchy Level</label>
+    <precision>2</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackHistory>false</trackHistory>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

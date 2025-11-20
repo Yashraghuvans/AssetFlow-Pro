@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Has_Child_Assets__c</fullName>
+    <description>Indicates if this asset has child assets in the hierarchy</description>
+    <externalId>false</externalId>
+    <formula>Child_Assets_Count__c &gt; 0</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Has Child Assets</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

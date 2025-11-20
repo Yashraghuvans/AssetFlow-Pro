@@ -1,16 +1,22 @@
 public class DailyOverdueDigest implements Schedulable {
     
+    // Email template developer name
+    private static final String EMAIL_TEMPLATE_NAME = 'Asset_Overdue_Maintenance_Alert';
+    
     public void execute(SchedulableContext sc) {
         sendDailyDigest();
     }
     
+    /**
+     * Send individual email alerts for each overdue asset using the email template
+     */
     public static void sendDailyDigest() {
         // Query all overdue assets
         List<Asset> overdueAssets = [
             SELECT Id, Name, SerialNumber, Maintenance_Status__c, 
                    Criticality__c, Days_Until_Maintenance__c, 
                    Next_Maintenance_Due__c, Last_Maintenance_Date__c,
-                   Site__c, Owner.Name, Owner.Email
+                   Site__c, Owner.Name, Owner.Email, OwnerId
             FROM Asset
             WHERE Status = 'Active' 
             AND Maintenance_Status__c = 'Overdue'
@@ -23,6 +29,82 @@ public class DailyOverdueDigest implements Schedulable {
             return;
         }
         
+        // Get the email template
+        EmailTemplate template = getEmailTemplate();
+        if (template == null) {
+            System.debug('Email template not found: ' + EMAIL_TEMPLATE_NAME);
+            // Fallback to summary digest
+            sendSummaryDigest(overdueAssets);
+            return;
+        }
+        
+        // Send individual alerts using template
+        sendIndividualAlerts(overdueAssets, template.Id);
+    }
+    
+    /**
+     * Get the email template by developer name
+     */
+    private static EmailTemplate getEmailTemplate() {
+        try {
+            return [
+                SELECT Id, DeveloperName, Subject, Body
+                FROM EmailTemplate
+                WHERE DeveloperName = :EMAIL_TEMPLATE_NAME
+                LIMIT 1
+            ];
+        } catch (Exception e) {
+            System.debug('Error retrieving email template: ' + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Send individual email alerts for critical/high priority assets
+     */
+    private static void sendIndividualAlerts(List<Asset> overdueAssets, Id templateId) {
+        List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+        
+        // Get org-wide email address if available
+        Id orgWideEmailId = getOrgWideEmailAddressId();
+        
+        for (Asset asset : overdueAssets) {
+            // Send individual alerts for Critical and High priority assets
+            if (asset.Criticality__c == 'Critical' || asset.Criticality__c == 'High') {
+                if (String.isNotBlank(asset.Owner.Email)) {
+                    Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+                    email.setTemplateId(templateId);
+                    email.setTargetObjectId(asset.OwnerId);
+                    email.setWhatId(asset.Id);
+                    email.setSaveAsActivity(false);
+                    
+                    if (orgWideEmailId != null) {
+                        email.setOrgWideEmailAddressId(orgWideEmailId);
+                    }
+                    
+                    emails.add(email);
+                }
+            }
+        }
+        
+        // Send emails in batches
+        if (!emails.isEmpty()) {
+            try {
+                Messaging.sendEmail(emails);
+                System.debug('Sent ' + emails.size() + ' individual overdue maintenance alerts.');
+            } catch (Exception e) {
+                System.debug('Error sending individual alerts: ' + e.getMessage());
+            }
+        }
+        
+        // Also send summary digest to maintenance manager
+        sendSummaryDigest(overdueAssets);
+    }
+    
+    /**
+     * Send summary digest email to maintenance manager
+     */
+    private static void sendSummaryDigest(List<Asset> overdueAssets) {
         // Count critical assets
         Integer criticalCount = 0;
         for (Asset a : overdueAssets) {
@@ -41,13 +123,9 @@ public class DailyOverdueDigest implements Schedulable {
         email.setHtmlBody(emailBody);
         
         // Set org-wide email address if available
-        List<OrgWideEmailAddress> orgWideAddresses = [
-            SELECT Id FROM OrgWideEmailAddress 
-            WHERE Address LIKE '%maintenance%' OR Address LIKE '%asset%'
-            LIMIT 1
-        ];
-        if (!orgWideAddresses.isEmpty()) {
-            email.setOrgWideEmailAddressId(orgWideAddresses[0].Id);
+        Id orgWideEmailId = getOrgWideEmailAddressId();
+        if (orgWideEmailId != null) {
+            email.setOrgWideEmailAddressId(orgWideEmailId);
         }
         
         try {
@@ -56,6 +134,18 @@ public class DailyOverdueDigest implements Schedulable {
         } catch (Exception e) {
             System.debug('Error sending daily digest: ' + e.getMessage());
         }
+    }
+    
+    /**
+     * Get org-wide email address ID
+     */
+    private static Id getOrgWideEmailAddressId() {
+        List<OrgWideEmailAddress> orgWideAddresses = [
+            SELECT Id FROM OrgWideEmailAddress 
+            WHERE Address LIKE '%maintenance%' OR Address LIKE '%asset%'
+            LIMIT 1
+        ];
+        return !orgWideAddresses.isEmpty() ? orgWideAddresses[0].Id : null;
     }
     
     private static String buildDigestEmailBody(List<Asset> overdueAssets, Integer criticalCount) {

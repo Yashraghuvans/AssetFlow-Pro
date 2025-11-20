@@ -5,17 +5,37 @@
 public with sharing class AssetDashboardController {
     
     /**
-     * Get asset counts grouped by status
+     * Get site options for filter
      */
     @AuraEnabled(cacheable=true)
-    public static Map<String, Integer> getAssetsByStatus() {
+    public static List<SiteOption> getSiteOptions() {
+        List<SiteOption> options = new List<SiteOption>();
+        
+        for (Schema.Location site : [SELECT Id, Name FROM Location ORDER BY Name]) {
+            SiteOption opt = new SiteOption();
+            opt.id = site.Id;
+            opt.name = site.Name;
+            options.add(opt);
+        }
+        
+        return options;
+    }
+    
+    /**
+     * Get asset counts grouped by status
+     */
+    @AuraEnabled
+    public static Map<String, Integer> getAssetsByStatus(FilterParams filters) {
         Map<String, Integer> statusMap = new Map<String, Integer>();
         
-        for (AggregateResult ar : [
-            SELECT Status, COUNT(Id) cnt
-            FROM Asset
-            GROUP BY Status
-        ]) {
+        String query = 'SELECT Status, COUNT(Id) cnt FROM Asset';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' WHERE ' + whereClause;
+        }
+        query += ' GROUP BY Status';
+        
+        for (AggregateResult ar : Database.query(query)) {
             String status = (String) ar.get('Status');
             Integer count = (Integer) ar.get('cnt');
             statusMap.put(status != null ? status : 'Unknown', count);
@@ -27,15 +47,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get asset counts grouped by criticality
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Integer> getAssetsByCriticality() {
+    @AuraEnabled
+    public static Map<String, Integer> getAssetsByCriticality(FilterParams filters) {
         Map<String, Integer> criticalityMap = new Map<String, Integer>();
         
-        for (AggregateResult ar : [
-            SELECT Criticality__c, COUNT(Id) cnt
-            FROM Asset
-            GROUP BY Criticality__c
-        ]) {
+        String query = 'SELECT Criticality__c, COUNT(Id) cnt FROM Asset';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' WHERE ' + whereClause;
+        }
+        query += ' GROUP BY Criticality__c';
+        
+        for (AggregateResult ar : Database.query(query)) {
             String criticality = (String) ar.get('Criticality__c');
             Integer count = (Integer) ar.get('cnt');
             criticalityMap.put(criticality != null ? criticality : 'Not Set', count);
@@ -47,15 +70,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get asset counts grouped by version status
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Integer> getAssetsByVersionStatus() {
+    @AuraEnabled
+    public static Map<String, Integer> getAssetsByVersionStatus(FilterParams filters) {
         Map<String, Integer> versionMap = new Map<String, Integer>();
         
-        for (AggregateResult ar : [
-            SELECT Version_Status__c, COUNT(Id) cnt
-            FROM Asset
-            GROUP BY Version_Status__c
-        ]) {
+        String query = 'SELECT Version_Status__c, COUNT(Id) cnt FROM Asset';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' WHERE ' + whereClause;
+        }
+        query += ' GROUP BY Version_Status__c';
+        
+        for (AggregateResult ar : Database.query(query)) {
             String versionStatus = (String) ar.get('Version_Status__c');
             Integer count = (Integer) ar.get('cnt');
             versionMap.put(versionStatus != null ? versionStatus : 'Not Set', count);
@@ -68,8 +94,8 @@ public with sharing class AssetDashboardController {
      * Get asset counts grouped by maintenance status
      * Note: Since Maintenance_Status__c is a formula field, we calculate it manually
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Integer> getAssetsByMaintenanceStatus() {
+    @AuraEnabled
+    public static Map<String, Integer> getAssetsByMaintenanceStatus(FilterParams filters) {
         Map<String, Integer> maintenanceMap = new Map<String, Integer>{
             'Current' => 0,
             'Due Soon' => 0,
@@ -77,13 +103,13 @@ public with sharing class AssetDashboardController {
             'Not Set' => 0
         };
         
-        // Query all active assets with maintenance fields
-        List<Asset> assets = [
-            SELECT Id, Next_Maintenance_Due__c, Maintenance_Interval_Days__c
-            FROM Asset
-            WHERE Status = 'Active'
-        ];
+        String query = 'SELECT Id, Next_Maintenance_Due__c, Maintenance_Interval_Days__c FROM Asset WHERE Status = \'Active\'';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
         
+        List<Asset> assets = Database.query(query);
         Date today = Date.today();
         
         for (Asset asset : assets) {
@@ -110,16 +136,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get total asset value grouped by criticality
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Decimal> getAssetValueByCriticality() {
+    @AuraEnabled
+    public static Map<String, Decimal> getAssetValueByCriticality(FilterParams filters) {
         Map<String, Decimal> valueMap = new Map<String, Decimal>();
         
-        for (AggregateResult ar : [
-            SELECT Criticality__c, SUM(Purchase_Cost__c) totalValue
-            FROM Asset
-            WHERE Purchase_Cost__c != null
-            GROUP BY Criticality__c
-        ]) {
+        String query = 'SELECT Criticality__c, SUM(Purchase_Cost__c) totalValue FROM Asset WHERE Purchase_Cost__c != null';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
+        query += ' GROUP BY Criticality__c';
+        
+        for (AggregateResult ar : Database.query(query)) {
             String criticality = (String) ar.get('Criticality__c');
             Decimal value = (Decimal) ar.get('totalValue');
             valueMap.put(criticality != null ? criticality : 'Not Set', value);
@@ -131,36 +159,37 @@ public with sharing class AssetDashboardController {
     /**
      * Get key metrics for the dashboard
      */
-    @AuraEnabled(cacheable=true)
-    public static DashboardMetrics getDashboardMetrics() {
+    @AuraEnabled
+    public static DashboardMetrics getDashboardMetrics(FilterParams filters) {
         DashboardMetrics metrics = new DashboardMetrics();
+        String whereClause = buildWhereClause(filters);
+        String baseWhere = whereClause != '' ? ' WHERE ' + whereClause : '';
         
         // Total assets
-        metrics.totalAssets = [SELECT COUNT() FROM Asset];
+        metrics.totalAssets = Database.countQuery('SELECT COUNT() FROM Asset' + baseWhere);
         
         // Active assets
-        metrics.activeAssets = [SELECT COUNT() FROM Asset WHERE Status = 'Active'];
+        String activeWhere = whereClause != '' ? ' WHERE Status = \'Active\' AND ' + whereClause : ' WHERE Status = \'Active\'';
+        metrics.activeAssets = Database.countQuery('SELECT COUNT() FROM Asset' + activeWhere);
         
-        // Overdue maintenance (calculate manually since it's a formula field)
-        metrics.overdueAssets = [
-            SELECT COUNT() 
-            FROM Asset 
-            WHERE Next_Maintenance_Due__c < TODAY AND Status = 'Active'
-        ];
+        // Overdue maintenance
+        String overdueWhere = whereClause != '' 
+            ? ' WHERE Next_Maintenance_Due__c < TODAY AND Status = \'Active\' AND ' + whereClause
+            : ' WHERE Next_Maintenance_Due__c < TODAY AND Status = \'Active\'';
+        metrics.overdueAssets = Database.countQuery('SELECT COUNT() FROM Asset' + overdueWhere);
         
         // Critical assets
-        metrics.criticalAssets = [
-            SELECT COUNT() 
-            FROM Asset 
-            WHERE Criticality__c = 'Critical' AND Status = 'Active'
-        ];
+        String criticalWhere = whereClause != ''
+            ? ' WHERE Criticality__c = \'Critical\' AND Status = \'Active\' AND ' + whereClause
+            : ' WHERE Criticality__c = \'Critical\' AND Status = \'Active\'';
+        metrics.criticalAssets = Database.countQuery('SELECT COUNT() FROM Asset' + criticalWhere);
         
         // Total asset value
-        AggregateResult ar = [
-            SELECT SUM(Purchase_Cost__c) total 
-            FROM Asset 
-            WHERE Purchase_Cost__c != null
-        ];
+        String valueQuery = 'SELECT SUM(Purchase_Cost__c) total FROM Asset WHERE Purchase_Cost__c != null';
+        if (whereClause != '') {
+            valueQuery += ' AND ' + whereClause;
+        }
+        AggregateResult ar = Database.query(valueQuery);
         metrics.totalValue = (Decimal) ar.get('total');
         if (metrics.totalValue == null) {
             metrics.totalValue = 0;
@@ -172,16 +201,17 @@ public with sharing class AssetDashboardController {
     /**
      * Get maintenance status grouped by site (for stacked bar chart)
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Map<String, Integer>> getMaintenanceStatusBySite() {
+    @AuraEnabled
+    public static Map<String, Map<String, Integer>> getMaintenanceStatusBySite(FilterParams filters) {
         Map<String, Map<String, Integer>> siteMap = new Map<String, Map<String, Integer>>();
         
-        List<Asset> assets = [
-            SELECT Id, Site__r.Name, Next_Maintenance_Due__c
-            FROM Asset
-            WHERE Status = 'Active' AND Site__c != null
-        ];
+        String query = 'SELECT Id, Site__r.Name, Next_Maintenance_Due__c FROM Asset WHERE Status = \'Active\' AND Site__c != null';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
         
+        List<Asset> assets = Database.query(query);
         Date today = Date.today();
         
         for (Asset asset : assets) {
@@ -213,16 +243,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get asset counts grouped by condition
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Integer> getAssetsByCondition() {
+    @AuraEnabled
+    public static Map<String, Integer> getAssetsByCondition(FilterParams filters) {
         Map<String, Integer> conditionMap = new Map<String, Integer>();
         
-        for (AggregateResult ar : [
-            SELECT Condition__c, COUNT(Id) cnt
-            FROM Asset
-            WHERE Condition__c != null
-            GROUP BY Condition__c
-        ]) {
+        String query = 'SELECT Condition__c, COUNT(Id) cnt FROM Asset WHERE Condition__c != null';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
+        query += ' GROUP BY Condition__c';
+        
+        for (AggregateResult ar : Database.query(query)) {
             String condition = (String) ar.get('Condition__c');
             Integer count = (Integer) ar.get('cnt');
             conditionMap.put(condition, count);
@@ -234,17 +266,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get top 10 most expensive assets
      */
-    @AuraEnabled(cacheable=true)
-    public static List<AssetValue> getTop10ExpensiveAssets() {
+    @AuraEnabled
+    public static List<AssetValue> getTop10ExpensiveAssets(FilterParams filters) {
         List<AssetValue> assetValues = new List<AssetValue>();
         
-        for (Asset asset : [
-            SELECT Id, Name, Purchase_Cost__c
-            FROM Asset
-            WHERE Purchase_Cost__c != null
-            ORDER BY Purchase_Cost__c DESC
-            LIMIT 10
-        ]) {
+        String query = 'SELECT Id, Name, Purchase_Cost__c FROM Asset WHERE Purchase_Cost__c != null';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
+        query += ' ORDER BY Purchase_Cost__c DESC LIMIT 10';
+        
+        for (Asset asset : Database.query(query)) {
             AssetValue av = new AssetValue();
             av.id = asset.Id;
             av.name = asset.Name;
@@ -258,18 +291,18 @@ public with sharing class AssetDashboardController {
     /**
      * Get assets needing maintenance schedule
      */
-    @AuraEnabled(cacheable=true)
-    public static List<MaintenanceAsset> getAssetsNeedingMaintenance() {
+    @AuraEnabled
+    public static List<MaintenanceAsset> getAssetsNeedingMaintenance(FilterParams filters) {
         List<MaintenanceAsset> maintenanceAssets = new List<MaintenanceAsset>();
         
-        for (Asset asset : [
-            SELECT Id, Name, Site__r.Name, Next_Maintenance_Due__c, Maintenance_Interval_Days__c
-            FROM Asset
-            WHERE Status = 'Active' 
-            AND (Next_Maintenance_Due__c = null OR Next_Maintenance_Due__c <= NEXT_N_DAYS:30)
-            ORDER BY Next_Maintenance_Due__c ASC NULLS FIRST
-            LIMIT 10
-        ]) {
+        String query = 'SELECT Id, Name, Site__r.Name, Next_Maintenance_Due__c, Maintenance_Interval_Days__c FROM Asset WHERE Status = \'Active\' AND (Next_Maintenance_Due__c = null OR Next_Maintenance_Due__c <= NEXT_N_DAYS:30)';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
+        query += ' ORDER BY Next_Maintenance_Due__c ASC NULLS FIRST LIMIT 10';
+        
+        for (Asset asset : Database.query(query)) {
             MaintenanceAsset ma = new MaintenanceAsset();
             ma.id = asset.Id;
             ma.name = asset.Name;
@@ -299,8 +332,8 @@ public with sharing class AssetDashboardController {
     /**
      * Get asset value by site (purchase cost vs current value)
      */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, SiteValue> getAssetValueBySite() {
+    @AuraEnabled
+    public static Map<String, SiteValue> getAssetValueBySite(FilterParams filters) {
         Map<String, SiteValue> siteValueMap = new Map<String, SiteValue>();
         
         // First get site IDs and their names
@@ -309,12 +342,14 @@ public with sharing class AssetDashboardController {
             siteIdToName.put(loc.Id, loc.Name);
         }
         
-        for (AggregateResult ar : [
-            SELECT Site__c, SUM(Purchase_Cost__c) purchaseCost, SUM(Current_Value__c) currentValue
-            FROM Asset
-            WHERE Site__c != null AND (Purchase_Cost__c != null OR Current_Value__c != null)
-            GROUP BY Site__c
-        ]) {
+        String query = 'SELECT Site__c, SUM(Purchase_Cost__c) purchaseCost, SUM(Current_Value__c) currentValue FROM Asset WHERE Site__c != null AND (Purchase_Cost__c != null OR Current_Value__c != null)';
+        String whereClause = buildWhereClause(filters);
+        if (whereClause != '') {
+            query += ' AND ' + whereClause;
+        }
+        query += ' GROUP BY Site__c';
+        
+        for (AggregateResult ar : Database.query(query)) {
             Id siteId = (Id) ar.get('Site__c');
             String siteName = siteIdToName.get(siteId);
             
@@ -369,5 +404,82 @@ public with sharing class AssetDashboardController {
     public class SiteValue {
         @AuraEnabled public Decimal purchaseCost { get; set; }
         @AuraEnabled public Decimal currentValue { get; set; }
+    }
+    
+    /**
+     * Wrapper class for site options
+     */
+    public class SiteOption {
+        @AuraEnabled public String id { get; set; }
+        @AuraEnabled public String name { get; set; }
+    }
+    
+    /**
+     * Wrapper class for filter parameters
+     */
+    public class FilterParams {
+        @AuraEnabled public List<String> siteIds { get; set; }
+        @AuraEnabled public List<String> criticalities { get; set; }
+        @AuraEnabled public String startDate { get; set; }
+        @AuraEnabled public String endDate { get; set; }
+    }
+    
+    /**
+     * Build WHERE clause based on filter parameters with proper validation
+     */
+    private static String buildWhereClause(FilterParams filters) {
+        List<String> conditions = new List<String>();
+        
+        if (filters == null) {
+            return '';
+        }
+        
+        // Validate and add site filter
+        if (filters.siteIds != null && !filters.siteIds.isEmpty()) {
+            List<String> validSiteIds = new List<String>();
+            for (String siteId : filters.siteIds) {
+                if (String.isNotBlank(siteId) && siteId instanceof Id) {
+                    validSiteIds.add('\'' + String.escapeSingleQuotes(siteId) + '\'');
+                }
+            }
+            if (!validSiteIds.isEmpty()) {
+                conditions.add('Site__c IN (' + String.join(validSiteIds, ',') + ')');
+            }
+        }
+        
+        // Validate and add criticality filter
+        if (filters.criticalities != null && !filters.criticalities.isEmpty()) {
+            List<String> validCriticalities = new List<String>();
+            Set<String> allowedValues = new Set<String>{'Critical', 'High', 'Medium', 'Low'};
+            for (String criticality : filters.criticalities) {
+                if (String.isNotBlank(criticality) && allowedValues.contains(criticality)) {
+                    validCriticalities.add('\'' + String.escapeSingleQuotes(criticality) + '\'');
+                }
+            }
+            if (!validCriticalities.isEmpty()) {
+                conditions.add('Criticality__c IN (' + String.join(validCriticalities, ',') + ')');
+            }
+        }
+        
+        // Validate and add date filters
+        if (String.isNotBlank(filters.startDate)) {
+            try {
+                Date.valueOf(filters.startDate); // Validate date format
+                conditions.add('Installation_Date__c >= ' + filters.startDate);
+            } catch (Exception e) {
+                System.debug('Invalid start date format: ' + filters.startDate);
+            }
+        }
+        
+        if (String.isNotBlank(filters.endDate)) {
+            try {
+                Date.valueOf(filters.endDate); // Validate date format
+                conditions.add('Installation_Date__c <= ' + filters.endDate);
+            } catch (Exception e) {
+                System.debug('Invalid end date format: ' + filters.endDate);
+            }
+        }
+        
+        return String.join(conditions, ' AND ');
     }
 }

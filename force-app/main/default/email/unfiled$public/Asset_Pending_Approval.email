@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #FFB75D 0%, #FFA500 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .greeting { font-size: 16px; margin-bottom: 20px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #FFA500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #FFB75D; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+        .info-table td:first-child { font-weight: 600; color: #555; width: 40%; }
+        .info-table td:last-child { color: #333; }
+        .info-table tr:last-child td { border-bottom: none; }
+        .process-box { background: #fff8f0; border-left: 4px solid #FFB75D; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .process-box ol { margin: 10px 0; padding-left: 20px; }
+        .process-box li { margin: 8px 0; }
+        .button { display: inline-block; padding: 12px 30px; background: #FFA500; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; margin: 10px 5px 0 0; }
+        .button:hover { background: #FF8C00; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏳ ASSET PENDING APPROVAL</h1>
+            <p>Submission Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello,
+            </div>
+            
+            <p>Your asset has been successfully submitted for approval and is currently pending review.</p>
+            
+            <div class="section">
+                <div class="section-title">Asset Details</div>
+                <table class="info-table">
+                    <tr>
+                        <td>Asset Name:</td>
+                        <td><strong>{!Asset.Name}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Purchase Cost:</td>
+                        <td><strong>{!Asset.Purchase_Cost__c}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td><span style="color: #FFA500; font-weight: 600;">Pending Approval</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="process-box">
+                <strong>Approval Process:</strong>
+                <p>Your asset will be reviewed by:</p>
+                <ol>
+                    <li><strong>Finance Manager</strong> - Financial validation and GL code verification</li>
+                    <li><strong>Asset Manager</strong> - Final approval (if purchase cost > $50,000)</li>
+                </ol>
+                <p style="margin-top: 15px;">You will receive a notification once the approval process is complete.</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="{!Asset.Link}" class="button">View Asset Details</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from the Asset Management System.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -13,6 +13,7 @@ import getAssetsByCondition from '@salesforce/apex/AssetDashboardController.getA
 import getTop10ExpensiveAssets from '@salesforce/apex/AssetDashboardController.getTop10ExpensiveAssets';
 import getAssetsNeedingMaintenance from '@salesforce/apex/AssetDashboardController.getAssetsNeedingMaintenance';
 import getAssetValueBySite from '@salesforce/apex/AssetDashboardController.getAssetValueBySite';
+import getSiteOptions from '@salesforce/apex/AssetDashboardController.getSiteOptions';
 
 export default class AssetDashboard extends NavigationMixin(LightningElement) {
     isLoading = true;
@@ -23,6 +24,29 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         overdueAssets: 0,
         criticalAssets: 0,
         totalValue: 0
+    };
+    
+    // Filter options
+    siteOptions = [];
+    criticalityOptions = [
+        { label: 'Critical', value: 'Critical' },
+        { label: 'High', value: 'High' },
+        { label: 'Medium', value: 'Medium' },
+        { label: 'Low', value: 'Low' }
+    ];
+    
+    // Selected filter values
+    selectedSites = [];
+    selectedCriticalities = [];
+    startDate = null;
+    endDate = null;
+    
+    // Applied filters (used for actual filtering)
+    appliedFilters = {
+        sites: [],
+        criticalities: [],
+        startDate: null,
+        endDate: null
     };
     
     // Chart configurations
@@ -78,11 +102,16 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         }
     ];
     
-    @wire(getDashboardMetrics)
-    wiredMetrics({ error, data }) {
-        if (data) {
-            this.metrics = data;
-        } else if (error) {
+    async loadMetrics() {
+        try {
+            const filters = {
+                siteIds: this.appliedFilters.sites,
+                criticalities: this.appliedFilters.criticalities,
+                startDate: this.appliedFilters.startDate,
+                endDate: this.appliedFilters.endDate
+            };
+            this.metrics = await getDashboardMetrics(filters);
+        } catch (error) {
             this.showError('Error loading metrics', error);
         }
     }
@@ -121,11 +150,76 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     }
     
     connectedCallback() {
+        this.loadSiteOptions();
+        this.loadMetrics();
+        this.loadAllCharts();
+    }
+    
+    async loadSiteOptions() {
+        try {
+            const sites = await getSiteOptions();
+            this.siteOptions = sites.map(site => ({
+                label: site.name,
+                value: site.id
+            }));
+        } catch (error) {
+            this.showError('Error loading site options', error);
+        }
+    }
+    
+    handleSiteChange(event) {
+        this.selectedSites = event.detail.value;
+    }
+    
+    handleCriticalityChange(event) {
+        this.selectedCriticalities = event.detail.value;
+    }
+    
+    handleStartDateChange(event) {
+        this.startDate = event.target.value;
+    }
+    
+    handleEndDateChange(event) {
+        this.endDate = event.target.value;
+    }
+    
+    handleApplyFilters() {
+        this.appliedFilters = {
+            sites: [...this.selectedSites],
+            criticalities: [...this.selectedCriticalities],
+            startDate: this.startDate,
+            endDate: this.endDate
+        };
+        this.isLoading = true;
+        this.loadMetrics();
+        this.loadAllCharts();
+    }
+    
+    handleClearFilters() {
+        this.selectedSites = [];
+        this.selectedCriticalities = [];
+        this.startDate = null;
+        this.endDate = null;
+        this.appliedFilters = {
+            sites: [],
+            criticalities: [],
+            startDate: null,
+            endDate: null
+        };
+        this.isLoading = true;
+        this.loadMetrics();
         this.loadAllCharts();
     }
     
     async loadAllCharts() {
         try {
+            const filters = {
+                siteIds: this.appliedFilters.sites,
+                criticalities: this.appliedFilters.criticalities,
+                startDate: this.appliedFilters.startDate,
+                endDate: this.appliedFilters.endDate
+            };
+            
             const [
                 statusData, 
                 criticalityData, 
@@ -138,16 +232,16 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
                 maintenanceAssetsData,
                 siteValueData
             ] = await Promise.all([
-                getAssetsByStatus(),
-                getAssetsByCriticality(),
-                getAssetsByVersionStatus(),
-                getAssetsByMaintenanceStatus(),
-                getAssetValueByCriticality(),
-                getMaintenanceStatusBySite(),
-                getAssetsByCondition(),
-                getTop10ExpensiveAssets(),
-                getAssetsNeedingMaintenance(),
-                getAssetValueBySite()
+                getAssetsByStatus(filters),
+                getAssetsByCriticality(filters),
+                getAssetsByVersionStatus(filters),
+                getAssetsByMaintenanceStatus(filters),
+                getAssetValueByCriticality(filters),
+                getMaintenanceStatusBySite(filters),
+                getAssetsByCondition(filters),
+                getTop10ExpensiveAssets(filters),
+                getAssetsNeedingMaintenance(filters),
+                getAssetValueBySite(filters)
             ]);
             
             this.prepareStatusChart(statusData);
@@ -360,6 +454,7 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     
     handleRefresh() {
         this.isLoading = true;
+        this.loadMetrics();
         this.loadAllCharts();
     }
     

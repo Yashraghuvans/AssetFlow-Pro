@@ -1,30 +1,16 @@
-⚠️ URGENT: MAINTENANCE OVERDUE ⚠️
+Dear {!Asset.Owner.Name},
 
-Hello,
+This is an automated notification that the following asset has overdue maintenance:
 
-ACTION REQUIRED: The following asset has overdue maintenance and requires immediate attention.
-
-ASSET DETAILS:
---------------
 Asset Name: {!Asset.Name}
 Serial Number: {!Asset.SerialNumber}
-Status: OVERDUE
-Last Maintenance: {!Asset.Last_Maintenance_Date__c}
 Next Maintenance Due: {!Asset.Next_Maintenance_Due__c}
 Criticality: {!Asset.Criticality__c}
-Site: {!Asset.Site__c}
+Site: {!Asset.Site__r.Name}
 
-RECOMMENDED ACTIONS:
--------------------
-- Review the asset's maintenance history
-- Schedule immediate maintenance
-- Update the maintenance status once completed
-- Document any issues or findings
+Please schedule maintenance as soon as possible to ensure optimal asset performance and compliance.
 
-Please take immediate action to address this overdue maintenance.
+To view the asset details, click here: {!Asset.Link}
 
-View Asset Details: {!Asset.Link}
-
----
-This is an automated notification from the Asset Management System.
-Please do not reply to this email.
+Thank you,
+Asset Management System
