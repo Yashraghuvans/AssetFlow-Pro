@@ -1,48 +1,355 @@
-.stat-card {
-    background: #f3f3f3;
+/* Dashboard Container */
+.triage-dashboard {
+    background-color: #f4f6f9;
+    min-height: 100vh;
+    font-family: 'Salesforce Sans', Arial, sans-serif;
+}
+
+/* Header Styles */
+.dashboard-header {
+    background-color: #e8eaed;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d0d3d6;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-icon {
+    background-color: #ff9500;
+    padding: 0.5rem;
     border-radius: 4px;
-    padding: 1rem;
+}
+
+.header-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #181818;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-title::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-color: #34c759;
+    border-radius: 50%;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    background-color: #ffffff;
+}
+
+/* Metrics Container */
+.metrics-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
+    background-color: #ffffff;
+}
+
+.metric-card {
+    background-color: #ffffff;
+    border-radius: 4px;
+    padding: 2rem 1.5rem;
     text-align: center;
-    border-left: 4px solid #0176d3;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid transparent;
 }
 
-.stat-card.attention {
-    border-left-color: #fe9339;
+.metric-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
 }
 
-.stat-label {
-    font-size: 0.75rem;
-    color: #706e6b;
-    text-transform: uppercase;
+.metric-breached {
+    border-left-color: #ea4c89;
+}
+
+.metric-breached .metric-indicator {
+    background-color: #ea4c89;
+}
+
+.metric-risk {
+    border-left-color: #ffb75d;
+}
+
+.metric-risk .metric-indicator {
+    background-color: #ffb75d;
+}
+
+.metric-track {
+    border-left-color: #4bca81;
+}
+
+.metric-track .metric-indicator {
+    background-color: #4bca81;
+}
+
+.metric-value {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1;
     margin-bottom: 0.5rem;
 }
 
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #080707;
-}
-
-.parent-row {
-    background-color: #e3f2fd !important;
-    font-weight: bold;
-    padding-left: 0.5rem;
-}
-
-.child-row {
-    background-color: #ffffff !important;
-    padding-left: 2rem;
-}
-
-.legend-item {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    margin-right: 0.5rem;
-    border-radius: 3px;
+.metric-label {
     font-size: 0.75rem;
+    font-weight: 600;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-lightning-datatable {
-    border: 1px solid #dddbda;
+/* Filters Section */
+.filters-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e5e5;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #181818;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.filter-dropdown {
+    width: 100%;
+}
+
+/* Table Container */
+.table-container {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    margin-top: 1px;
+}
+
+/* Triage Table */
+.triage-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 4px;
+    overflow: hidden;
+}
+
+.triage-table thead {
+    background-color: #3c3c3c;
+}
+
+.triage-table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.triage-table tbody tr {
+    border-bottom: 1px solid #e5e5e5;
+    transition: background-color 0.15s ease;
+}
+
+.triage-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.triage-table td {
+    padding: 1rem;
+    color: #181818;
+    font-size: 0.875rem;
+}
+
+.table-link {
+    color: #0176d3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.table-link:hover {
+    text-decoration: underline;
+}
+
+.asset-link {
+    color: #0176d3;
+    text-decoration: none;
+}
+
+.asset-link:hover {
+    text-decoration: underline;
+}
+
+/* Priority Indicators */
+.priority-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.priority-green {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #4bca81;
+}
+
+.priority-yellow {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ffb75d;
+}
+
+.priority-red {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ea4c89;
+}
+
+/* SLA Risk Badges */
+.sla-breached {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #fce7f3;
+    color: #ea4c89;
+}
+
+.sla-none {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #706e6b;
+}
+
+/* Action Button */
+.action-button {
+    color: #0176d3;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #706e6b;
+}
+
+.empty-message {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Error Container */
+.error-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background-color: #fef5f5;
+    border-left: 4px solid #ea4c89;
+    margin: 1.5rem;
+}
+
+.error-message {
+    color: #ea4c89;
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .metrics-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filters-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .metrics-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 3rem;
+    }
+    
+    .filters-section {
+        padding: 1rem;
+    }
+    
+    .table-container {
+        padding: 1rem;
+        overflow-x: auto;
+    }
+    
+    .triage-table {
+        font-size: 0.75rem;
+    }
+    
+    .triage-table th,
+    .triage-table td {
+        padding: 0.75rem 0.5rem;
+    }
 }

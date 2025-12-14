@@ -1,97 +1,157 @@
 <template>
-    <lightning-card title="Asset Hierarchy Report" icon-name="standard:asset_object">
-        <div slot="actions">
-            <lightning-button 
-                label="Refresh" 
-                icon-name="utility:refresh" 
-                onclick={handleRefresh}
-                class="slds-m-right_x-small">
-            </lightning-button>
-            <lightning-button 
-                label="Export CSV" 
-                icon-name="utility:download" 
-                onclick={handleExport}>
-            </lightning-button>
-        </div>
-
-        <!-- Statistics Section -->
-        <div class="slds-p-around_medium">
-            <div class="slds-grid slds-wrap slds-gutters">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Parent Assets</div>
-                        <div class="stat-value">{formattedStats.totalParents}</div>
-                    </div>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Child Assets</div>
-                        <div class="stat-value">{formattedStats.totalChildren}</div>
-                    </div>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                    <div class="stat-card">
-                        <div class="stat-label">Avg Children per Parent</div>
-                        <div class="stat-value">{formattedStats.avgChildren}</div>
-                    </div>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Asset Value</div>
-                        <div class="stat-value">{formattedStats.totalValue}</div>
-                    </div>
-                </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                    <div class="stat-card attention">
-                        <div class="stat-label">Requiring Attention</div>
-                        <div class="stat-value">{formattedStats.assetsRequiringAttention}</div>
-                    </div>
-                </div>
+    <div class="triage-dashboard">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <lightning-icon icon-name="standard:asset_object" size="small" class="header-icon"></lightning-icon>
+                <h1 class="header-title">Asset Hierarchy Triage Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <lightning-button 
+                    label="Refresh SLA Status" 
+                    icon-name="utility:refresh"
+                    variant="brand"
+                    onclick={handleRefresh}>
+                </lightning-button>
             </div>
         </div>
 
-        <!-- Data Table -->
-        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
-            <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
-            </template>
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-container">
+                <lightning-spinner alternative-text="Loading..." size="large"></lightning-spinner>
+            </div>
+        </template>
 
-            <template if:false={isLoading}>
-                <template if:true={hierarchyData}>
-                    <lightning-datatable
-                        key-field="id"
-                        data={hierarchyData}
-                        columns={columns}
-                        hide-checkbox-column
-                        onrowaction={handleRowAction}>
-                    </lightning-datatable>
-                </template>
+        <!-- Dashboard Content -->
+        <template if:false={isLoading}>
+            <!-- Metric Cards -->
+            <div class="metrics-container">
+                <div class="metric-card metric-breached">
+                    <div class="metric-indicator"></div>
+                    <div class="metric-value">{formattedStats.breached}</div>
+                    <div class="metric-label">SLA BREACHED</div>
+                </div>
 
-                <template if:true={error}>
-                    <div class="slds-text-color_error slds-p-around_medium">
-                        Error loading data: {error.body.message}
-                    </div>
-                </template>
-            </template>
-        </div>
+                <div class="metric-card metric-risk">
+                    <div class="metric-indicator"></div>
+                    <div class="metric-value">{formattedStats.atRisk}</div>
+                    <div class="metric-label">AT RISK</div>
+                </div>
 
-        <!-- Legend -->
-        <div slot="footer" class="slds-p-around_medium">
-            <div class="slds-text-title_caps slds-m-bottom_x-small">Legend:</div>
-            <div class="slds-grid slds-wrap slds-gutters_x-small">
-                <div class="slds-col">
-                    <span class="legend-item parent-row">Parent Asset</span>
-                </div>
-                <div class="slds-col">
-                    <span class="legend-item child-row">Child Asset</span>
-                </div>
-                <div class="slds-col">
-                    <span class="legend-item slds-text-color_error">Critical</span>
-                </div>
-                <div class="slds-col">
-                    <span class="legend-item slds-theme_warning">Poor Condition</span>
+                <div class="metric-card metric-track">
+                    <div class="metric-indicator"></div>
+                    <div class="metric-value">{formattedStats.onTrack}</div>
+                    <div class="metric-label">ON TRACK</div>
                 </div>
             </div>
-        </div>
-    </lightning-card>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <lightning-combobox
+                        name="status"
+                        placeholder="All Statuses"
+                        value={selectedStatus}
+                        options={statusOptions}
+                        onchange={handleStatusChange}
+                        class="filter-dropdown">
+                    </lightning-combobox>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Location</label>
+                    <lightning-combobox
+                        name="location"
+                        placeholder="Filter by location"
+                        value={selectedLocation}
+                        options={locationOptions}
+                        onchange={handleLocationChange}
+                        class="filter-dropdown">
+                    </lightning-combobox>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Classification</label>
+                    <lightning-combobox
+                        name="classification"
+                        placeholder="Filter by classification"
+                        value={selectedClassification}
+                        options={classificationOptions}
+                        onchange={handleClassificationChange}
+                        class="filter-dropdown">
+                    </lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <template if:true={hasData}>
+                    <table class="triage-table">
+                        <thead>
+                            <tr>
+                                <th>SR Number</th>
+                                <th>Priority</th>
+                                <th>Asset</th>
+                                <th>Classification</th>
+                                <th>Age</th>
+                                <th>SLA Risk</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableData} for:item="row">
+                                <tr key={row.id}>
+                                    <td>
+                                        <a href="#" class="table-link" data-id={row.id} onclick={handleRowClick}>
+                                            {row.srNumber}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class={row.priorityClass}></span>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="asset-link" data-id={row.assetId} onclick={handleAssetClick}>
+                                            {row.assetName}
+                                        </a>
+                                    </td>
+                                    <td>{row.classification}</td>
+                                    <td>{row.age}</td>
+                                    <td>
+                                        <span class={row.slaRiskClass}>{row.slaRisk}</span>
+                                    </td>
+                                    <td>
+                                        <lightning-button-icon
+                                            icon-name="utility:preview"
+                                            alternative-text="View"
+                                            title="View Details"
+                                            data-id={row.id}
+                                            onclick={handleViewAction}
+                                            class="action-button">
+                                        </lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+
+                <template if:false={hasData}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:success" size="large"></lightning-icon>
+                        <p class="empty-message">No assets requiring attention</p>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Error Message -->
+        <template if:true={error}>
+            <div class="error-container">
+                <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                <span class="error-message">Error loading data: {error.body.message}</span>
+            </div>
+        </template>
+    </div>
 </template>
