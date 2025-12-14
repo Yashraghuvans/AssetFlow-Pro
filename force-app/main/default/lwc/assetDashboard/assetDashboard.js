@@ -60,47 +60,8 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     siteValueChartConfig;
     
     // Table data
-    expensiveAssets = [];
-    maintenanceAssets = [];
-    
-    // Table columns
-    expensiveColumns = [
-        { label: 'Asset Name', fieldName: 'assetUrl', type: 'url', typeAttributes: { label: { fieldName: 'name' }, target: '_blank' } },
-        { label: 'Value', fieldName: 'value', type: 'currency', cellAttributes: { alignment: 'left' } },
-        { 
-            type: 'action',
-            typeAttributes: { 
-                rowActions: [
-                    { label: 'View Details', name: 'view' },
-                    { label: 'Edit', name: 'edit' }
-                ]
-            }
-        }
-    ];
-    
-    maintenanceColumns = [
-        { label: 'Asset Name', fieldName: 'assetUrl', type: 'url', typeAttributes: { label: { fieldName: 'name' }, target: '_blank' } },
-        { label: 'Site', fieldName: 'site', type: 'text' },
-        { label: 'Next Due', fieldName: 'nextMaintenanceDue', type: 'date' },
-        { 
-            label: 'Status', 
-            fieldName: 'status', 
-            type: 'text',
-            cellAttributes: {
-                class: { fieldName: 'statusClass' }
-            }
-        },
-        { label: 'Days Until Due', fieldName: 'daysUntilDue', type: 'number' },
-        { 
-            type: 'action',
-            typeAttributes: { 
-                rowActions: [
-                    { label: 'View Details', name: 'view' },
-                    { label: 'Schedule Maintenance', name: 'schedule' }
-                ]
-            }
-        }
-    ];
+    recentAssets = [];
+    searchTerm = '';
     
     async loadMetrics() {
         try {
@@ -141,12 +102,8 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         return Math.round((this.metrics.activeAssets / this.metrics.totalAssets) * 100);
     }
     
-    get hasExpensiveAssets() {
-        return this.expensiveAssets && this.expensiveAssets.length > 0;
-    }
-    
-    get hasMaintenanceAssets() {
-        return this.maintenanceAssets && this.maintenanceAssets.length > 0;
+    get hasRecentAssets() {
+        return this.recentAssets && this.recentAssets.length > 0;
     }
     
     connectedCallback() {
@@ -414,42 +371,97 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     }
     
     prepareExpensiveAssetsTable(data) {
-        this.expensiveAssets = data.map(asset => ({
-            id: asset.id,
-            name: asset.name,
-            value: asset.value,
-            assetUrl: `/lightning/r/Asset/${asset.id}/view`
-        }));
+        // Sample data for recent assets table
+        this.recentAssets = [
+            {
+                id: '1',
+                number: 'WO-23501',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Backup Gen 1',
+                status: 'In Progress',
+                technician: 'John S',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '2',
+                number: 'WO-00125',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'LED Panel - Room 201',
+                status: 'In Progress',
+                technician: 'Demo Supervisor',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '3',
+                number: 'WO-23550',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '1 - Critical',
+                priorityClass: 'priority-critical',
+                name: 'GEN-A',
+                status: 'Approved',
+                technician: 'Mike J',
+                initiationSource: 'Asset Failure'
+            },
+            {
+                id: '4',
+                number: 'WO-23499',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '2 - High',
+                priorityClass: 'priority-high',
+                name: 'CHIL-B1',
+                status: 'On Hold',
+                technician: 'Sarah',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '5',
+                number: 'WO-23475',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '2 - High',
+                priorityClass: 'priority-high',
+                name: 'PUMP-A3',
+                status: 'In Progress',
+                technician: 'David',
+                initiationSource: 'Service Request'
+            },
+            {
+                id: '6',
+                number: 'WO-23470',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Fire Pump 1',
+                status: 'Completed',
+                technician: 'Mike J',
+                initiationSource: 'Auto (Meter)'
+            },
+            {
+                id: '7',
+                number: 'WO-23468',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Door Latch',
+                status: 'New',
+                technician: 'Unassigned',
+                initiationSource: 'Manual'
+            }
+        ];
     }
     
     prepareMaintenanceAssetsTable(data) {
-        const today = new Date();
-        this.maintenanceAssets = data.map(asset => {
-            let daysUntilDue = null;
-            let statusClass = '';
-            
-            if (asset.nextMaintenanceDue) {
-                const dueDate = new Date(asset.nextMaintenanceDue);
-                daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-                
-                if (asset.status === 'Overdue') {
-                    statusClass = 'slds-text-color_error slds-text-title_bold';
-                } else if (asset.status === 'Due Soon') {
-                    statusClass = 'slds-text-color_warning slds-text-title_bold';
-                }
-            }
-            
-            return {
-                id: asset.id,
-                name: asset.name,
-                site: asset.site || 'Not Assigned',
-                nextMaintenanceDue: asset.nextMaintenanceDue,
-                status: asset.status,
-                statusClass: statusClass,
-                daysUntilDue: daysUntilDue,
-                assetUrl: `/lightning/r/Asset/${asset.id}/view`
-            };
-        });
+        // This method is no longer needed but kept for compatibility
     }
     
     handleRefresh() {
@@ -511,49 +523,61 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         });
     }
     
-    handleRowAction(event) {
-        const actionName = event.detail.action.name;
-        const row = event.detail.row;
-        
-        switch (actionName) {
-            case 'view':
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'view'
-                    }
-                });
-                break;
-            case 'edit':
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'edit'
-                    }
-                });
-                break;
-            case 'schedule':
-                this.dispatchEvent(new ShowToastEvent({
-                    title: 'Schedule Maintenance',
-                    message: `Opening maintenance scheduler for ${row.name}`,
-                    variant: 'info'
-                }));
-                // Navigate to edit page with focus on maintenance fields
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'edit'
-                    }
-                });
-                break;
-            default:
+    handleRowClick(event) {
+        const assetId = event.currentTarget.dataset.id;
+        if (assetId) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: assetId,
+                    objectApiName: 'Asset',
+                    actionName: 'view'
+                }
+            });
         }
+    }
+    
+    handleSearch(event) {
+        this.searchTerm = event.target.value.toLowerCase();
+        // Implement search filtering logic here
+    }
+    
+    handleNewAsset() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: {
+                objectApiName: 'Asset',
+                actionName: 'new'
+            }
+        });
+    }
+    
+    navigateToReports() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: {
+                objectApiName: 'Report',
+                actionName: 'home'
+            }
+        });
+    }
+    
+    handleViewSchedule(event) {
+        event.preventDefault();
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'View Schedule',
+            message: 'Opening maintenance schedule...',
+            variant: 'info'
+        }));
+    }
+    
+    handleViewEmergency(event) {
+        event.preventDefault();
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Emergency Work Orders',
+            message: 'Opening emergency work orders...',
+            variant: 'info'
+        }));
     }
     
     handleScheduleMaintenance() {
