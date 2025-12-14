@@ -1,312 +1,390 @@
 <template>
-    <lightning-card title="Asset Management Dashboard" icon-name="custom:custom63">
-        <div slot="actions">
-            <lightning-button-icon 
-                icon-name="utility:refresh" 
-                alternative-text="Refresh" 
-                onclick={handleRefresh}
-                title="Refresh Dashboard">
-            </lightning-button-icon>
+    <div class="dashboard-container">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <lightning-icon icon-name="custom:custom63" size="small" class="header-icon"></lightning-icon>
+                <div class="header-title-section">
+                    <div class="header-subtitle">Asset Management</div>
+                    <h1 class="header-title">Unified Asset Dashboard</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <lightning-button 
+                    label="Reports" 
+                    icon-name="utility:chart"
+                    onclick={navigateToReports}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    label="New Asset" 
+                    icon-name="utility:add"
+                    variant="brand"
+                    onclick={handleNewAsset}>
+                </lightning-button>
+            </div>
         </div>
         
-        <div class="slds-p-around_medium">
+        <div class="dashboard-content">
             <!-- Loading Spinner -->
             <template if:true={isLoading}>
-                <lightning-spinner alternative-text="Loading dashboard..." size="medium"></lightning-spinner>
-            </template>
-            
-            <!-- Dashboard Filters -->
-            <template if:false={isLoading}>
-                <div class="filter-section slds-box slds-m-bottom_medium">
-                    <div class="slds-grid slds-gutters slds-wrap">
-                        <div class="slds-col slds-size_1-of-1">
-                            <h3 class="slds-text-heading_small slds-m-bottom_small">
-                                <lightning-icon icon-name="utility:filterList" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                                Dashboard Filters
-                            </h3>
-                        </div>
-                        
-                        <!-- Site Filter -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                            <lightning-dual-listbox
-                                name="siteFilter"
-                                label="Site"
-                                source-label="Available Sites"
-                                selected-label="Selected Sites"
-                                options={siteOptions}
-                                value={selectedSites}
-                                onchange={handleSiteChange}
-                                field-level-help="Filter assets by site location">
-                            </lightning-dual-listbox>
-                        </div>
-                        
-                        <!-- Date Range Filter -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                            <div class="date-range-wrapper">
-                                <label class="slds-form-element__label">Installation Date Range</label>
-                                <lightning-input
-                                    type="date"
-                                    name="startDate"
-                                    label="From Date"
-                                    value={startDate}
-                                    onchange={handleStartDateChange}
-                                    class="slds-m-bottom_x-small">
-                                </lightning-input>
-                                <lightning-input
-                                    type="date"
-                                    name="endDate"
-                                    label="To Date"
-                                    value={endDate}
-                                    onchange={handleEndDateChange}>
-                                </lightning-input>
-                            </div>
-                        </div>
-                        
-                        <!-- Criticality Filter -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                            <lightning-dual-listbox
-                                name="criticalityFilter"
-                                label="Criticality"
-                                source-label="Available Levels"
-                                selected-label="Selected Levels"
-                                options={criticalityOptions}
-                                value={selectedCriticalities}
-                                onchange={handleCriticalityChange}
-                                field-level-help="Filter assets by criticality level">
-                            </lightning-dual-listbox>
-                        </div>
-                        
-                        <!-- Filter Actions -->
-                        <div class="slds-col slds-size_1-of-1 slds-text-align_right slds-m-top_small">
-                            <lightning-button
-                                label="Clear All Filters"
-                                onclick={handleClearFilters}
-                                variant="neutral"
-                                class="slds-m-right_x-small">
-                            </lightning-button>
-                            <lightning-button
-                                label="Apply Filters"
-                                onclick={handleApplyFilters}
-                                variant="brand">
-                            </lightning-button>
-                        </div>
-                    </div>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading dashboard..." size="large"></lightning-spinner>
                 </div>
             </template>
             
-            <!-- Key Metrics Cards -->
+            <!-- Dashboard Content -->
             <template if:false={isLoading}>
-                <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_large">
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                        <a onclick={navigateToAllAssets} class="metric-card-link">
-                            <div class="metric-card slds-box slds-theme_default clickable">
-                                <div class="metric-icon slds-text-align_center">
-                                    <lightning-icon icon-name="standard:asset_object" size="small"></lightning-icon>
-                                </div>
-                                <div class="metric-value slds-text-align_center">{metrics.totalAssets}</div>
-                                <div class="metric-label slds-text-align_center">Total Assets</div>
-                                <div class="metric-subtitle slds-text-align_center">Click to view all</div>
-                            </div>
-                        </a>
+                <!-- Key Metrics Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card" onclick={navigateToAllAssets}>
+                        <div class="metric-header">
+                            <div class="metric-title">TOTAL ASSETS</div>
+                        </div>
+                        <div class="metric-main-value">{metrics.totalAssets}</div>
+                        <div class="metric-subtitle">Total</div>
+                        <div class="metric-details">
+                            <span class="detail-item">CM: {metrics.activeAssets}</span>
+                            <span class="detail-item">PM: {metrics.criticalAssets}</span>
+                        </div>
                     </div>
                     
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 hide-on-mobile">
-                        <a onclick={navigateToActiveAssets} class="metric-card-link">
-                            <div class="metric-card slds-box slds-theme_success clickable">
-                                <div class="metric-icon slds-text-align_center">
-                                    <lightning-icon icon-name="utility:check" size="small" variant="inverse"></lightning-icon>
-                                </div>
-                                <div class="metric-value slds-text-align_center">{metrics.activeAssets}</div>
-                                <div class="metric-label slds-text-align_center">Active Assets</div>
-                                <div class="metric-subtitle slds-text-align_center">{activePercentage}% of total</div>
-                            </div>
-                        </a>
+                    <div class="metric-card metric-card-critical" onclick={navigateToOverdueAssets}>
+                        <div class="metric-header">
+                            <div class="metric-title">OVERDUE</div>
+                        </div>
+                        <div class="metric-main-value">{metrics.overdueAssets}</div>
+                        <div class="metric-subtitle">Critical</div>
+                        <div class="metric-details">
+                            <span class="detail-item">CM: 5</span>
+                            <span class="detail-item">PM: 3</span>
+                        </div>
+                        <div class="metric-indicator"></div>
                     </div>
                     
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                        <a onclick={navigateToOverdueAssets} class="metric-card-link">
-                            <div class="metric-card slds-box slds-theme_error clickable">
-                                <div class="metric-icon slds-text-align_center">
-                                    <lightning-icon icon-name="utility:warning" size="small" variant="inverse"></lightning-icon>
-                                </div>
-                                <div class="metric-value slds-text-align_center">{metrics.overdueAssets}</div>
-                                <div class="metric-label slds-text-align_center">Overdue Maintenance</div>
-                                <div class="metric-subtitle slds-text-align_center">Requires immediate action</div>
-                            </div>
-                        </a>
+                    <div class="metric-card" onclick={navigateToActiveAssets}>
+                        <div class="metric-header">
+                            <div class="metric-title">COMPLETED (WEEK)</div>
+                        </div>
+                        <div class="metric-main-value">{metrics.activeAssets}</div>
+                        <div class="metric-subtitle">↑ 12%</div>
+                        <div class="metric-details">
+                            <span class="detail-item">CM: 28</span>
+                            <span class="detail-item">PM: 14</span>
+                        </div>
                     </div>
                     
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5">
-                        <a onclick={navigateToCriticalAssets} class="metric-card-link">
-                            <div class="metric-card slds-box slds-theme_warning clickable">
-                                <div class="metric-icon slds-text-align_center">
-                                    <lightning-icon icon-name="utility:priority" size="small"></lightning-icon>
-                                </div>
-                                <div class="metric-value slds-text-align_center">{metrics.criticalAssets}</div>
-                                <div class="metric-label slds-text-align_center">Critical Assets</div>
-                                <div class="metric-subtitle slds-text-align_center">High priority items</div>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 hide-on-mobile">
-                        <div class="metric-card slds-box slds-theme_info">
-                            <div class="metric-icon slds-text-align_center">
-                                <lightning-icon icon-name="utility:moneybag" size="small" variant="inverse"></lightning-icon>
-                            </div>
-                            <div class="metric-value slds-text-align_center">{formattedTotalValue}</div>
-                            <div class="metric-label slds-text-align_center">Total Value</div>
-                            <div class="metric-subtitle slds-text-align_center">Asset portfolio value</div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">AVG TIME TO COMPLETE</div>
+                        </div>
+                        <div class="metric-main-value">3.2</div>
+                        <div class="metric-subtitle">Hours</div>
+                        <div class="metric-details">
+                            <span class="detail-item">CM: 2.1h</span>
+                            <span class="detail-item">PM: 4.5h</span>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Charts Grid -->
-                <div class="slds-grid slds-gutters slds-wrap">
-                    <!-- Component 4: Maintenance Status by Site (Horizontal Stacked Bar) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
-                        <lightning-card title="Maintenance Status by Site">
-                            <template if:true={maintenanceBySiteConfig}>
-                                <div class="chart-wrapper chart-large">
-                                    <c-simple-chart 
-                                        chart-type="horizontalBar"
-                                        chart-data={maintenanceBySiteConfig}>
-                                    </c-simple-chart>
-                                </div>
-                            </template>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Component 5: Assets by Criticality (Pie Chart) -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
-                        <lightning-card title="Assets by Criticality">
-                            <template if:true={criticalityChartConfig}>
-                                <div class="chart-wrapper">
-                                    <c-simple-chart 
-                                        chart-type="pie"
-                                        chart-data={criticalityChartConfig}>
-                                    </c-simple-chart>
-                                </div>
-                            </template>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Component 6: Assets by Condition (Funnel) - Hidden on mobile -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Assets by Condition">
-                            <template if:true={conditionChartConfig}>
-                                <div class="chart-wrapper">
-                                    <c-simple-chart 
-                                        chart-type="funnel"
-                                        chart-data={conditionChartConfig}>
-                                    </c-simple-chart>
-                                </div>
-                            </template>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Component 7: Version Status (Gauge) - Hidden on mobile -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Version Status">
-                            <template if:true={versionChartConfig}>
-                                <div class="chart-wrapper">
-                                    <c-simple-chart 
-                                        chart-type="gauge"
-                                        chart-data={versionChartConfig}>
-                                    </c-simple-chart>
-                                </div>
-                            </template>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Maintenance Status Overview - Hidden on mobile -->
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Maintenance Status Overview">
-                            <template if:true={maintenanceChartConfig}>
-                                <div class="chart-wrapper">
-                                    <c-simple-chart 
-                                        chart-type="bar"
-                                        chart-data={maintenanceChartConfig}>
-                                    </c-simple-chart>
-                                </div>
-                            </template>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Component 8: Top 10 Expensive Assets (Table) - Hidden on mobile (too wide) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Top 10 Expensive Assets" icon-name="standard:currency">
-                            <div slot="actions">
-                                <lightning-button 
-                                    label="View All" 
-                                    onclick={navigateToAllAssets}
-                                    variant="neutral">
-                                </lightning-button>
-                            </div>
-                            <div class="slds-p-around_medium">
-                                <template if:true={hasExpensiveAssets}>
-                                    <lightning-datatable
-                                        key-field="id"
-                                        data={expensiveAssets}
-                                        columns={expensiveColumns}
-                                        hide-checkbox-column
-                                        onrowaction={handleRowAction}>
-                                    </lightning-datatable>
-                                </template>
-                                <template if:false={hasExpensiveAssets}>
-                                    <div class="slds-text-align_center slds-p-around_medium">
-                                        <p class="slds-text-color_weak">No asset data available</p>
+                <!-- Analysis Sections Grid -->
+                <div class="analysis-grid">
+                    <!-- Active Workload Analysis -->
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <lightning-icon icon-name="utility:chart" size="x-small"></lightning-icon>
+                            <span class="analysis-title">Active Workload Analysis</span>
+                        </div>
+                        <div class="analysis-content">
+                            <div class="workload-section">
+                                <div class="workload-type">Preventive (PM)</div>
+                                <div class="workload-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Planned</span>
+                                        <span class="stat-value">127</span>
                                     </div>
-                                </template>
-                            </div>
-                        </lightning-card>
-                    </div>
-                    
-                    <!-- Component 9: Assets Needing Maintenance Schedule (Table) - Hidden on mobile (too wide) -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Assets Needing Maintenance Schedule" icon-name="standard:maintenance_plan">
-                            <div slot="actions">
-                                <lightning-button 
-                                    label="Schedule Maintenance" 
-                                    onclick={handleScheduleMaintenance}
-                                    variant="brand">
-                                </lightning-button>
-                            </div>
-                            <div class="slds-p-around_medium">
-                                <template if:true={hasMaintenanceAssets}>
-                                    <lightning-datatable
-                                        key-field="id"
-                                        data={maintenanceAssets}
-                                        columns={maintenanceColumns}
-                                        hide-checkbox-column
-                                        onrowaction={handleRowAction}>
-                                    </lightning-datatable>
-                                </template>
-                                <template if:false={hasMaintenanceAssets}>
-                                    <div class="slds-text-align_center slds-p-around_medium">
-                                        <lightning-icon icon-name="utility:success" size="large"></lightning-icon>
-                                        <p class="slds-m-top_small">All assets are up to date with maintenance!</p>
+                                    <div class="stat-row">
+                                        <span class="stat-label">On-Time Rate</span>
+                                        <span class="stat-value stat-success">94.2%</span>
                                     </div>
-                                </template>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Due Next 7 Days</span>
+                                        <span class="stat-value">23</span>
+                                    </div>
+                                </div>
+                                <a href="#" onclick={handleViewSchedule} class="view-link">View Schedule →</a>
                             </div>
-                        </lightning-card>
+                            <div class="workload-section">
+                                <div class="workload-type workload-type-corrective">Corrective (CM)</div>
+                                <div class="workload-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">Open CMs</span>
+                                        <span class="stat-value">89</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Priority 1 (Critical)</span>
+                                        <span class="stat-value stat-critical">12</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Priority 2 (High)</span>
+                                        <span class="stat-value stat-warning">28</span>
+                                    </div>
+                                </div>
+                                <a href="#" onclick={handleViewEmergency} class="view-link">View Emergency WOs →</a>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- Component 10: Asset Value by Site (Stacked Bars) - Hidden on mobile -->
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium hide-on-mobile">
-                        <lightning-card title="Asset Value by Site">
-                            <template if:true={siteValueChartConfig}>
-                                <div class="chart-wrapper">
-                                    <c-simple-chart 
-                                        chart-type="bar"
-                                        chart-data={siteValueChartConfig}>
-                                    </c-simple-chart>
+                    <!-- Initiation Sources -->
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <lightning-icon icon-name="utility:trending" size="x-small"></lightning-icon>
+                            <span class="analysis-title">Initiation Sources (Last 30 Days)</span>
+                        </div>
+                        <div class="analysis-content">
+                            <div class="source-bar-container">
+                                <div class="source-bar-item">
+                                    <div class="source-bar-label">
+                                        <span>PM Auto-Generated (Time)</span>
+                                        <span class="source-bar-count">84 Assets (67%)</span>
+                                    </div>
+                                    <div class="source-bar-wrapper">
+                                        <div class="source-bar source-bar-primary" style="width: 67%"></div>
+                                    </div>
+                                </div>
+                                <div class="source-bar-item">
+                                    <div class="source-bar-label">
+                                        <span>CM Service Requests</span>
+                                        <span class="source-bar-count">28 Assets (22%)</span>
+                                    </div>
+                                    <div class="source-bar-wrapper">
+                                        <div class="source-bar source-bar-secondary" style="width: 22%"></div>
+                                    </div>
+                                </div>
+                                <div class="source-bar-item">
+                                    <div class="source-bar-label">
+                                        <span>PM Auto-Generated (Meter)</span>
+                                        <span class="source-bar-count">8 Assets (6%)</span>
+                                    </div>
+                                    <div class="source-bar-wrapper">
+                                        <div class="source-bar source-bar-tertiary" style="width: 6%"></div>
+                                    </div>
+                                </div>
+                                <div class="source-bar-item">
+                                    <div class="source-bar-label">
+                                        <span>CM Asset Failure (IoT)</span>
+                                        <span class="source-bar-count">3 Assets (2%)</span>
+                                    </div>
+                                    <div class="source-bar-wrapper">
+                                        <div class="source-bar source-bar-danger" style="width: 2%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="source-total">Total: 126 Work Orders</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Assets Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h2 class="table-title">Recent Assets</h2>
+                        <div class="table-search">
+                            <lightning-input 
+                                type="search" 
+                                placeholder="Search list..."
+                                onchange={handleSearch}
+                                class="search-input">
+                            </lightning-input>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <template if:true={hasRecentAssets}>
+                            <table class="professional-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Number</th>
+                                        <th>Type</th>
+                                        <th>Priority</th>
+                                        <th>Asset Name</th>
+                                        <th>Status</th>
+                                        <th>Technician</th>
+                                        <th>Initiation Source</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={recentAssets} for:item="asset">
+                                        <tr key={asset.id} onclick={handleRowClick} data-id={asset.id}>
+                                            <td><a href="#" class="table-link">{asset.number}</a></td>
+                                            <td><span class={asset.typeClass}>{asset.type}</span></td>
+                                            <td><span class={asset.priorityClass}>{asset.priority}</span></td>
+                                            <td>{asset.name}</td>
+                                            <td>{asset.status}</td>
+                                            <td>{asset.technician}</td>
+                                            <td class="initiation-source">{asset.initiationSource}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <template if:false={hasRecentAssets}>
+                            <div class="empty-state">
+                                <p>No asset data available</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Asset Value and Critical Assets Section -->
+                <div class="compliance-section">
+                    <!-- Asset Value Trend Chart -->
+                    <div class="compliance-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:chart" size="x-small"></lightning-icon>
+                            <span class="card-title">Asset Value Trend (Last 6 Months)</span>
+                            <div class="legend">
+                                <span class="legend-item">
+                                    <span class="legend-dot legend-target"></span>
+                                    Purchase Cost
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-dot legend-actual"></span>
+                                    Current Value
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <template if:true={assetValueChartConfig}>
+                                <c-simple-chart 
+                                    chart-type="line"
+                                    chart-data={assetValueChartConfig}>
+                                </c-simple-chart>
+                            </template>
+                        </div>
+                        <div class="chart-footer">
+                            <span class="footer-label">Total Portfolio Value: {formattedTotalValue}</span>
+                            <span class="footer-trend trend-improving">
+                                <lightning-icon icon-name="utility:arrowup" size="xx-small"></lightning-icon>
+                                Trend: Stable
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Critical Assets Requiring Attention -->
+                    <div class="action-required-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:warning" size="x-small" class="warning-icon"></lightning-icon>
+                            <span class="card-title">Critical Assets Requiring Attention</span>
+                        </div>
+                        <div class="overdue-list">
+                            <template for:each={criticalAssetsList} for:item="item">
+                                <div key={item.id} class="overdue-item">
+                                    <div class="overdue-header">
+                                        <span class="overdue-title">{item.assetName}</span>
+                                        <span class="overdue-days">{item.status}</span>
+                                    </div>
+                                    <div class="overdue-details">{item.details}</div>
+                                    <div class="overdue-actions">
+                                        <lightning-button 
+                                            label="Schedule Maintenance"
+                                            variant="neutral"
+                                            class="action-btn"
+                                            data-id={item.id}
+                                            onclick={handleScheduleAssetMaintenance}>
+                                        </lightning-button>
+                                        <lightning-button 
+                                            label="View"
+                                            variant="neutral"
+                                            class="action-btn"
+                                            data-id={item.id}
+                                            onclick={handleViewCriticalAsset}>
+                                        </lightning-button>
+                                    </div>
                                 </div>
                             </template>
-                        </lightning-card>
+                        </div>
+                        <div class="view-all-link">
+                            <a href="#" onclick={handleViewAllCritical}>View all critical assets...</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Distribution and Maintenance Schedule -->
+                <div class="bottom-section">
+                    <!-- Asset Health by Category -->
+                    <div class="compliance-class-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:layers" size="x-small"></lightning-icon>
+                            <span class="card-title">Asset Health by Category</span>
+                        </div>
+                        <div class="compliance-list">
+                            <template for:each={assetHealthByCategory} for:item="item">
+                                <div key={item.id} class="compliance-item">
+                                    <div class="compliance-item-header">
+                                        <span class="class-name">{item.categoryName}</span>
+                                        <span class="compliance-percentage" data-status={item.healthStatus}>
+                                            {item.healthPercentage}
+                                            <template if:true={item.improving}>
+                                                <lightning-icon icon-name="utility:arrowup" size="xx-small" class="trend-icon"></lightning-icon>
+                                            </template>
+                                        </span>
+                                    </div>
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-bar" data-status={item.healthStatus} data-width={item.healthPercentage}></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Maintenance Schedule -->
+                    <div class="pm-schedules-card">
+                        <div class="card-header">
+                            <span class="card-title">Upcoming Maintenance Schedule</span>
+                            <div class="search-box">
+                                <lightning-input 
+                                    type="search" 
+                                    placeholder="Search assets..."
+                                    onchange={handleMaintenanceSearch}
+                                    class="pm-search-input">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="pm-table-container">
+                            <table class="pm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Number</th>
+                                        <th>Asset Name</th>
+                                        <th>Location</th>
+                                        <th>Next Maintenance</th>
+                                        <th>Condition</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={maintenanceSchedule} for:item="maintenance">
+                                        <tr key={maintenance.id}>
+                                            <td>
+                                                <a href="#" class="pm-link" data-id={maintenance.id} onclick={handleMaintenanceAssetClick}>
+                                                    {maintenance.assetNumber}
+                                                </a>
+                                            </td>
+                                            <td>{maintenance.assetName}</td>
+                                            <td>{maintenance.location}</td>
+                                            <td class={maintenance.dueDateClass}>{maintenance.nextMaintenance}</td>
+                                            <td>
+                                                <span class={maintenance.conditionClass}>{maintenance.condition}</span>
+                                            </td>
+                                            <td class={maintenance.priorityClass}>{maintenance.priority}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </template>
         </div>
-    </lightning-card>
+    </div>
 </template>

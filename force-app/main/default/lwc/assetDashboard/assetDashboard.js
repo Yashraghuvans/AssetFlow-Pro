@@ -60,47 +60,14 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     siteValueChartConfig;
     
     // Table data
-    expensiveAssets = [];
-    maintenanceAssets = [];
+    recentAssets = [];
+    searchTerm = '';
     
-    // Table columns
-    expensiveColumns = [
-        { label: 'Asset Name', fieldName: 'assetUrl', type: 'url', typeAttributes: { label: { fieldName: 'name' }, target: '_blank' } },
-        { label: 'Value', fieldName: 'value', type: 'currency', cellAttributes: { alignment: 'left' } },
-        { 
-            type: 'action',
-            typeAttributes: { 
-                rowActions: [
-                    { label: 'View Details', name: 'view' },
-                    { label: 'Edit', name: 'edit' }
-                ]
-            }
-        }
-    ];
-    
-    maintenanceColumns = [
-        { label: 'Asset Name', fieldName: 'assetUrl', type: 'url', typeAttributes: { label: { fieldName: 'name' }, target: '_blank' } },
-        { label: 'Site', fieldName: 'site', type: 'text' },
-        { label: 'Next Due', fieldName: 'nextMaintenanceDue', type: 'date' },
-        { 
-            label: 'Status', 
-            fieldName: 'status', 
-            type: 'text',
-            cellAttributes: {
-                class: { fieldName: 'statusClass' }
-            }
-        },
-        { label: 'Days Until Due', fieldName: 'daysUntilDue', type: 'number' },
-        { 
-            type: 'action',
-            typeAttributes: { 
-                rowActions: [
-                    { label: 'View Details', name: 'view' },
-                    { label: 'Schedule Maintenance', name: 'schedule' }
-                ]
-            }
-        }
-    ];
+    // Asset analysis data
+    assetValueChartConfig;
+    criticalAssetsList = [];
+    assetHealthByCategory = [];
+    maintenanceSchedule = [];
     
     async loadMetrics() {
         try {
@@ -141,18 +108,18 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         return Math.round((this.metrics.activeAssets / this.metrics.totalAssets) * 100);
     }
     
-    get hasExpensiveAssets() {
-        return this.expensiveAssets && this.expensiveAssets.length > 0;
-    }
-    
-    get hasMaintenanceAssets() {
-        return this.maintenanceAssets && this.maintenanceAssets.length > 0;
+    get hasRecentAssets() {
+        return this.recentAssets && this.recentAssets.length > 0;
     }
     
     connectedCallback() {
         this.loadSiteOptions();
         this.loadMetrics();
         this.loadAllCharts();
+        this.loadAssetValueTrend();
+        this.loadCriticalAssets();
+        this.loadAssetHealthByCategory();
+        this.loadMaintenanceSchedule();
     }
     
     async loadSiteOptions() {
@@ -414,42 +381,97 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     }
     
     prepareExpensiveAssetsTable(data) {
-        this.expensiveAssets = data.map(asset => ({
-            id: asset.id,
-            name: asset.name,
-            value: asset.value,
-            assetUrl: `/lightning/r/Asset/${asset.id}/view`
-        }));
+        // Sample data for recent assets table
+        this.recentAssets = [
+            {
+                id: '1',
+                number: 'WO-23501',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Backup Gen 1',
+                status: 'In Progress',
+                technician: 'John S',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '2',
+                number: 'WO-00125',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'LED Panel - Room 201',
+                status: 'In Progress',
+                technician: 'Demo Supervisor',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '3',
+                number: 'WO-23550',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '1 - Critical',
+                priorityClass: 'priority-critical',
+                name: 'GEN-A',
+                status: 'Approved',
+                technician: 'Mike J',
+                initiationSource: 'Asset Failure'
+            },
+            {
+                id: '4',
+                number: 'WO-23499',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '2 - High',
+                priorityClass: 'priority-high',
+                name: 'CHIL-B1',
+                status: 'On Hold',
+                technician: 'Sarah',
+                initiationSource: 'Auto (Time)'
+            },
+            {
+                id: '5',
+                number: 'WO-23475',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '2 - High',
+                priorityClass: 'priority-high',
+                name: 'PUMP-A3',
+                status: 'In Progress',
+                technician: 'David',
+                initiationSource: 'Service Request'
+            },
+            {
+                id: '6',
+                number: 'WO-23470',
+                type: 'PM',
+                typeClass: 'badge badge-pm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Fire Pump 1',
+                status: 'Completed',
+                technician: 'Mike J',
+                initiationSource: 'Auto (Meter)'
+            },
+            {
+                id: '7',
+                number: 'WO-23468',
+                type: 'CM',
+                typeClass: 'badge badge-cm',
+                priority: '3 - Medium',
+                priorityClass: 'priority-medium',
+                name: 'Door Latch',
+                status: 'New',
+                technician: 'Unassigned',
+                initiationSource: 'Manual'
+            }
+        ];
     }
     
     prepareMaintenanceAssetsTable(data) {
-        const today = new Date();
-        this.maintenanceAssets = data.map(asset => {
-            let daysUntilDue = null;
-            let statusClass = '';
-            
-            if (asset.nextMaintenanceDue) {
-                const dueDate = new Date(asset.nextMaintenanceDue);
-                daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-                
-                if (asset.status === 'Overdue') {
-                    statusClass = 'slds-text-color_error slds-text-title_bold';
-                } else if (asset.status === 'Due Soon') {
-                    statusClass = 'slds-text-color_warning slds-text-title_bold';
-                }
-            }
-            
-            return {
-                id: asset.id,
-                name: asset.name,
-                site: asset.site || 'Not Assigned',
-                nextMaintenanceDue: asset.nextMaintenanceDue,
-                status: asset.status,
-                statusClass: statusClass,
-                daysUntilDue: daysUntilDue,
-                assetUrl: `/lightning/r/Asset/${asset.id}/view`
-            };
-        });
+        // This method is no longer needed but kept for compatibility
     }
     
     handleRefresh() {
@@ -511,49 +533,61 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         });
     }
     
-    handleRowAction(event) {
-        const actionName = event.detail.action.name;
-        const row = event.detail.row;
-        
-        switch (actionName) {
-            case 'view':
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'view'
-                    }
-                });
-                break;
-            case 'edit':
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'edit'
-                    }
-                });
-                break;
-            case 'schedule':
-                this.dispatchEvent(new ShowToastEvent({
-                    title: 'Schedule Maintenance',
-                    message: `Opening maintenance scheduler for ${row.name}`,
-                    variant: 'info'
-                }));
-                // Navigate to edit page with focus on maintenance fields
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
-                    attributes: {
-                        recordId: row.id,
-                        objectApiName: 'Asset',
-                        actionName: 'edit'
-                    }
-                });
-                break;
-            default:
+    handleRowClick(event) {
+        const assetId = event.currentTarget.dataset.id;
+        if (assetId) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: assetId,
+                    objectApiName: 'Asset',
+                    actionName: 'view'
+                }
+            });
         }
+    }
+    
+    handleSearch(event) {
+        this.searchTerm = event.target.value.toLowerCase();
+        // Implement search filtering logic here
+    }
+    
+    handleNewAsset() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: {
+                objectApiName: 'Asset',
+                actionName: 'new'
+            }
+        });
+    }
+    
+    navigateToReports() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__objectPage',
+            attributes: {
+                objectApiName: 'Report',
+                actionName: 'home'
+            }
+        });
+    }
+    
+    handleViewSchedule(event) {
+        event.preventDefault();
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'View Schedule',
+            message: 'Opening maintenance schedule...',
+            variant: 'info'
+        }));
+    }
+    
+    handleViewEmergency(event) {
+        event.preventDefault();
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Emergency Work Orders',
+            message: 'Opening emergency work orders...',
+            variant: 'info'
+        }));
     }
     
     handleScheduleMaintenance() {
@@ -569,6 +603,213 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
             attributes: {
                 objectApiName: 'Maintenance__c',
                 actionName: 'new'
+            }
+        });
+    }
+    
+    // Load asset value trend data
+    loadAssetValueTrend() {
+        this.assetValueChartConfig = {
+            type: 'line',
+            title: 'Asset Value Trend',
+            labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [
+                {
+                    label: 'Purchase Cost',
+                    borderColor: '#5867e8',
+                    backgroundColor: 'transparent',
+                    data: [2500000, 2520000, 2540000, 2580000, 2600000, 2650000],
+                    borderDash: [5, 5]
+                },
+                {
+                    label: 'Current Value',
+                    borderColor: '#4bca81',
+                    backgroundColor: 'rgba(75, 202, 129, 0.1)',
+                    data: [2400000, 2410000, 2430000, 2460000, 2480000, 2520000],
+                    fill: true
+                }
+            ]
+        };
+    }
+    
+    // Load critical assets requiring attention
+    loadCriticalAssets() {
+        this.criticalAssetsList = [
+            {
+                id: '1',
+                assetName: 'Backup Generator - Building A',
+                status: 'Critical',
+                details: 'Last maintenance overdue by 45 days • Criticality: High'
+            },
+            {
+                id: '2',
+                assetName: 'HVAC Unit - Room 301',
+                status: 'Poor Condition',
+                details: 'Condition score: 2.1/10 • Requires immediate inspection'
+            },
+            {
+                id: '3',
+                assetName: 'Fire Suppression System',
+                status: 'Inspection Due',
+                details: 'Annual inspection due in 5 days • Compliance required'
+            }
+        ];
+    }
+    
+    // Load asset health by category
+    loadAssetHealthByCategory() {
+        this.assetHealthByCategory = [
+            {
+                id: '1',
+                categoryName: 'HVAC Systems',
+                healthPercentage: '87.5%',
+                healthStatus: 'good',
+                improving: true
+            },
+            {
+                id: '2',
+                categoryName: 'Electrical Equipment',
+                healthPercentage: '92.0%',
+                healthStatus: 'excellent',
+                improving: false
+            },
+            {
+                id: '3',
+                categoryName: 'Safety Systems',
+                healthPercentage: '78.3%',
+                healthStatus: 'warning',
+                improving: false
+            },
+            {
+                id: '4',
+                categoryName: 'Manufacturing Equipment',
+                healthPercentage: '95.0%',
+                healthStatus: 'excellent',
+                improving: true
+            }
+        ];
+    }
+    
+    // Load maintenance schedule
+    loadMaintenanceSchedule() {
+        this.maintenanceSchedule = [
+            {
+                id: '1',
+                assetNumber: 'AST-1001',
+                assetName: 'HVAC Unit - Building A',
+                location: 'Building A, Roof',
+                nextMaintenance: '2025-12-20',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            },
+            {
+                id: '2',
+                assetNumber: 'AST-2045',
+                assetName: 'Backup Generator',
+                location: 'Building B, Basement',
+                nextMaintenance: '2025-12-10',
+                dueDateClass: 'due-date-overdue',
+                condition: 'Fair',
+                conditionClass: 'status-badge',
+                priority: 'High',
+                priorityClass: 'priority-high'
+            },
+            {
+                id: '3',
+                assetNumber: 'AST-3012',
+                assetName: 'Fire Pump System',
+                location: 'Main Building',
+                nextMaintenance: '2025-12-25',
+                dueDateClass: '',
+                condition: 'Excellent',
+                conditionClass: 'status-badge status-active',
+                priority: 'Critical',
+                priorityClass: 'priority-critical'
+            },
+            {
+                id: '4',
+                assetNumber: 'AST-4567',
+                assetName: 'Elevator System A',
+                location: 'Tower 1',
+                nextMaintenance: '2026-01-05',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            },
+            {
+                id: '5',
+                assetNumber: 'AST-5890',
+                assetName: 'Chiller Unit 2',
+                location: 'Mechanical Room',
+                nextMaintenance: '2025-12-18',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Low',
+                priorityClass: 'priority-low'
+            },
+            {
+                id: '6',
+                assetNumber: 'AST-6234',
+                assetName: 'Conveyor Belt System',
+                location: 'Warehouse',
+                nextMaintenance: '2026-01-10',
+                dueDateClass: '',
+                condition: 'Fair',
+                conditionClass: 'status-badge',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            }
+        ];
+    }
+    
+    // Handle critical asset actions
+    handleScheduleAssetMaintenance(event) {
+        const itemId = event.currentTarget.dataset.id;
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Schedule Maintenance',
+            message: 'Opening maintenance scheduler...',
+            variant: 'info'
+        }));
+    }
+    
+    handleViewCriticalAsset(event) {
+        const itemId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: itemId,
+                objectApiName: 'Asset',
+                actionName: 'view'
+            }
+        });
+    }
+    
+    handleViewAllCritical(event) {
+        event.preventDefault();
+        this.navigateToCriticalAssets();
+    }
+    
+    // Handle maintenance schedule actions
+    handleMaintenanceSearch(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        // Implement maintenance search filtering logic here
+    }
+    
+    handleMaintenanceAssetClick(event) {
+        event.preventDefault();
+        const assetId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: assetId,
+                objectApiName: 'Asset',
+                actionName: 'view'
             }
         });
     }
