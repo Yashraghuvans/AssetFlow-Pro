@@ -63,6 +63,12 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
     recentAssets = [];
     searchTerm = '';
     
+    // Asset analysis data
+    assetValueChartConfig;
+    criticalAssetsList = [];
+    assetHealthByCategory = [];
+    maintenanceSchedule = [];
+    
     async loadMetrics() {
         try {
             const filters = {
@@ -110,6 +116,10 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
         this.loadSiteOptions();
         this.loadMetrics();
         this.loadAllCharts();
+        this.loadAssetValueTrend();
+        this.loadCriticalAssets();
+        this.loadAssetHealthByCategory();
+        this.loadMaintenanceSchedule();
     }
     
     async loadSiteOptions() {
@@ -593,6 +603,213 @@ export default class AssetDashboard extends NavigationMixin(LightningElement) {
             attributes: {
                 objectApiName: 'Maintenance__c',
                 actionName: 'new'
+            }
+        });
+    }
+    
+    // Load asset value trend data
+    loadAssetValueTrend() {
+        this.assetValueChartConfig = {
+            type: 'line',
+            title: 'Asset Value Trend',
+            labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [
+                {
+                    label: 'Purchase Cost',
+                    borderColor: '#5867e8',
+                    backgroundColor: 'transparent',
+                    data: [2500000, 2520000, 2540000, 2580000, 2600000, 2650000],
+                    borderDash: [5, 5]
+                },
+                {
+                    label: 'Current Value',
+                    borderColor: '#4bca81',
+                    backgroundColor: 'rgba(75, 202, 129, 0.1)',
+                    data: [2400000, 2410000, 2430000, 2460000, 2480000, 2520000],
+                    fill: true
+                }
+            ]
+        };
+    }
+    
+    // Load critical assets requiring attention
+    loadCriticalAssets() {
+        this.criticalAssetsList = [
+            {
+                id: '1',
+                assetName: 'Backup Generator - Building A',
+                status: 'Critical',
+                details: 'Last maintenance overdue by 45 days • Criticality: High'
+            },
+            {
+                id: '2',
+                assetName: 'HVAC Unit - Room 301',
+                status: 'Poor Condition',
+                details: 'Condition score: 2.1/10 • Requires immediate inspection'
+            },
+            {
+                id: '3',
+                assetName: 'Fire Suppression System',
+                status: 'Inspection Due',
+                details: 'Annual inspection due in 5 days • Compliance required'
+            }
+        ];
+    }
+    
+    // Load asset health by category
+    loadAssetHealthByCategory() {
+        this.assetHealthByCategory = [
+            {
+                id: '1',
+                categoryName: 'HVAC Systems',
+                healthPercentage: '87.5%',
+                healthStatus: 'good',
+                improving: true
+            },
+            {
+                id: '2',
+                categoryName: 'Electrical Equipment',
+                healthPercentage: '92.0%',
+                healthStatus: 'excellent',
+                improving: false
+            },
+            {
+                id: '3',
+                categoryName: 'Safety Systems',
+                healthPercentage: '78.3%',
+                healthStatus: 'warning',
+                improving: false
+            },
+            {
+                id: '4',
+                categoryName: 'Manufacturing Equipment',
+                healthPercentage: '95.0%',
+                healthStatus: 'excellent',
+                improving: true
+            }
+        ];
+    }
+    
+    // Load maintenance schedule
+    loadMaintenanceSchedule() {
+        this.maintenanceSchedule = [
+            {
+                id: '1',
+                assetNumber: 'AST-1001',
+                assetName: 'HVAC Unit - Building A',
+                location: 'Building A, Roof',
+                nextMaintenance: '2025-12-20',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            },
+            {
+                id: '2',
+                assetNumber: 'AST-2045',
+                assetName: 'Backup Generator',
+                location: 'Building B, Basement',
+                nextMaintenance: '2025-12-10',
+                dueDateClass: 'due-date-overdue',
+                condition: 'Fair',
+                conditionClass: 'status-badge',
+                priority: 'High',
+                priorityClass: 'priority-high'
+            },
+            {
+                id: '3',
+                assetNumber: 'AST-3012',
+                assetName: 'Fire Pump System',
+                location: 'Main Building',
+                nextMaintenance: '2025-12-25',
+                dueDateClass: '',
+                condition: 'Excellent',
+                conditionClass: 'status-badge status-active',
+                priority: 'Critical',
+                priorityClass: 'priority-critical'
+            },
+            {
+                id: '4',
+                assetNumber: 'AST-4567',
+                assetName: 'Elevator System A',
+                location: 'Tower 1',
+                nextMaintenance: '2026-01-05',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            },
+            {
+                id: '5',
+                assetNumber: 'AST-5890',
+                assetName: 'Chiller Unit 2',
+                location: 'Mechanical Room',
+                nextMaintenance: '2025-12-18',
+                dueDateClass: '',
+                condition: 'Good',
+                conditionClass: 'status-badge status-active',
+                priority: 'Low',
+                priorityClass: 'priority-low'
+            },
+            {
+                id: '6',
+                assetNumber: 'AST-6234',
+                assetName: 'Conveyor Belt System',
+                location: 'Warehouse',
+                nextMaintenance: '2026-01-10',
+                dueDateClass: '',
+                condition: 'Fair',
+                conditionClass: 'status-badge',
+                priority: 'Medium',
+                priorityClass: 'priority-medium'
+            }
+        ];
+    }
+    
+    // Handle critical asset actions
+    handleScheduleAssetMaintenance(event) {
+        const itemId = event.currentTarget.dataset.id;
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Schedule Maintenance',
+            message: 'Opening maintenance scheduler...',
+            variant: 'info'
+        }));
+    }
+    
+    handleViewCriticalAsset(event) {
+        const itemId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: itemId,
+                objectApiName: 'Asset',
+                actionName: 'view'
+            }
+        });
+    }
+    
+    handleViewAllCritical(event) {
+        event.preventDefault();
+        this.navigateToCriticalAssets();
+    }
+    
+    // Handle maintenance schedule actions
+    handleMaintenanceSearch(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        // Implement maintenance search filtering logic here
+    }
+    
+    handleMaintenanceAssetClick(event) {
+        event.preventDefault();
+        const assetId = event.currentTarget.dataset.id;
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: assetId,
+                objectApiName: 'Asset',
+                actionName: 'view'
             }
         });
     }

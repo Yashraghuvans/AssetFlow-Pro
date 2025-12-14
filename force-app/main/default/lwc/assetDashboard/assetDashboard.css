@@ -479,3 +479,410 @@
         padding: 0.75rem 0.5rem;
     }
 }
+
+
+/* Compliance Section */
+.compliance-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.compliance-card,
+.action-required-card {
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #fafafa;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #181818;
+    flex: 1;
+}
+
+.warning-icon {
+    color: #ea4c89;
+}
+
+.legend {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #706e6b;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-target {
+    background-color: #5867e8;
+}
+
+.legend-actual {
+    background-color: #4bca81;
+}
+
+.chart-container {
+    padding: 1.5rem;
+    min-height: 250px;
+}
+
+.chart-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e5e5;
+    background-color: #fafafa;
+}
+
+.footer-label {
+    font-size: 0.8125rem;
+    color: #706e6b;
+}
+
+.footer-trend {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.trend-improving {
+    color: #4bca81;
+}
+
+/* Action Required (Overdue) */
+.overdue-list {
+    padding: 1rem 1.5rem;
+}
+
+.overdue-item {
+    background-color: #fef5f5;
+    border-left: 3px solid #ea4c89;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.overdue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.overdue-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #181818;
+}
+
+.overdue-days {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ea4c89;
+}
+
+.overdue-details {
+    font-size: 0.8125rem;
+    color: #706e6b;
+    margin-bottom: 0.75rem;
+}
+
+.overdue-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.view-all-link {
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    border-top: 1px solid #e5e5e5;
+}
+
+.view-all-link a {
+    font-size: 0.8125rem;
+    color: #5867e8;
+    text-decoration: none;
+}
+
+.view-all-link a:hover {
+    text-decoration: underline;
+}
+
+/* Bottom Section */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.compliance-class-card,
+.pm-schedules-card {
+    background-color: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Compliance by Asset Class */
+.compliance-list {
+    padding: 1.5rem;
+}
+
+.compliance-item {
+    margin-bottom: 1.5rem;
+}
+
+.compliance-item:last-child {
+    margin-bottom: 0;
+}
+
+.compliance-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.class-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #181818;
+}
+
+.compliance-percentage {
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.compliance-percentage[data-status="excellent"] {
+    color: #4bca81;
+}
+
+.compliance-percentage[data-status="good"] {
+    color: #ffb75d;
+}
+
+.compliance-percentage[data-status="warning"] {
+    color: #ea4c89;
+}
+
+.trend-icon {
+    color: #4bca81;
+}
+
+.progress-bar-wrapper {
+    background-color: #f3f3f3;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar[data-status="excellent"] {
+    background-color: #4bca81;
+}
+
+.progress-bar[data-status="good"] {
+    background-color: #ffb75d;
+}
+
+.progress-bar[data-status="warning"] {
+    background-color: #ea4c89;
+}
+
+/* Progress bar widths */
+.progress-bar[data-width="93.3%"] {
+    width: 93.3%;
+}
+
+.progress-bar[data-width="100%"] {
+    width: 100%;
+}
+
+.progress-bar[data-width="83.3%"] {
+    width: 83.3%;
+}
+
+/* PM Schedules */
+.search-box {
+    margin-left: auto;
+    width: 250px;
+}
+
+.pm-search-input {
+    --slds-c-input-sizing-border: 1px solid #d8dde6;
+    --slds-c-input-radius-border: 4px;
+}
+
+.pm-table-container {
+    overflow-x: auto;
+}
+
+.pm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.pm-table thead {
+    background-color: #fafafa;
+}
+
+.pm-table th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    font-weight: 600;
+    color: #706e6b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.pm-table tbody tr {
+    border-bottom: 1px solid #f3f3f3;
+    transition: background-color 0.15s ease;
+}
+
+.pm-table tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.pm-table td {
+    padding: 1rem;
+    color: #181818;
+}
+
+.pm-link {
+    color: #5867e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.pm-link:hover {
+    text-decoration: underline;
+}
+
+.due-date-overdue {
+    color: #ea4c89;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #e0f7e9;
+    color: #4bca81;
+}
+
+.compliance-cell {
+    font-weight: 600;
+}
+
+.priority-low {
+    color: #4bca81;
+}
+
+.priority-medium {
+    color: #706e6b;
+}
+
+.priority-high {
+    color: #ffb75d;
+    font-weight: 600;
+}
+
+.priority-critical {
+    color: #ea4c89;
+    font-weight: 600;
+}
+
+/* Responsive Design for New Sections */
+@media (max-width: 1200px) {
+    .compliance-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .bottom-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .legend {
+        margin-left: 0;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .overdue-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        width: 100%;
+    }
+    
+    .pm-table {
+        font-size: 0.75rem;
+    }
+    
+    .pm-table th,
+    .pm-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}

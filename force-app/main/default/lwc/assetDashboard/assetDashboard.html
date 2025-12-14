@@ -234,6 +234,156 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- Asset Value and Critical Assets Section -->
+                <div class="compliance-section">
+                    <!-- Asset Value Trend Chart -->
+                    <div class="compliance-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:chart" size="x-small"></lightning-icon>
+                            <span class="card-title">Asset Value Trend (Last 6 Months)</span>
+                            <div class="legend">
+                                <span class="legend-item">
+                                    <span class="legend-dot legend-target"></span>
+                                    Purchase Cost
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-dot legend-actual"></span>
+                                    Current Value
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <template if:true={assetValueChartConfig}>
+                                <c-simple-chart 
+                                    chart-type="line"
+                                    chart-data={assetValueChartConfig}>
+                                </c-simple-chart>
+                            </template>
+                        </div>
+                        <div class="chart-footer">
+                            <span class="footer-label">Total Portfolio Value: {formattedTotalValue}</span>
+                            <span class="footer-trend trend-improving">
+                                <lightning-icon icon-name="utility:arrowup" size="xx-small"></lightning-icon>
+                                Trend: Stable
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Critical Assets Requiring Attention -->
+                    <div class="action-required-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:warning" size="x-small" class="warning-icon"></lightning-icon>
+                            <span class="card-title">Critical Assets Requiring Attention</span>
+                        </div>
+                        <div class="overdue-list">
+                            <template for:each={criticalAssetsList} for:item="item">
+                                <div key={item.id} class="overdue-item">
+                                    <div class="overdue-header">
+                                        <span class="overdue-title">{item.assetName}</span>
+                                        <span class="overdue-days">{item.status}</span>
+                                    </div>
+                                    <div class="overdue-details">{item.details}</div>
+                                    <div class="overdue-actions">
+                                        <lightning-button 
+                                            label="Schedule Maintenance"
+                                            variant="neutral"
+                                            class="action-btn"
+                                            data-id={item.id}
+                                            onclick={handleScheduleAssetMaintenance}>
+                                        </lightning-button>
+                                        <lightning-button 
+                                            label="View"
+                                            variant="neutral"
+                                            class="action-btn"
+                                            data-id={item.id}
+                                            onclick={handleViewCriticalAsset}>
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="view-all-link">
+                            <a href="#" onclick={handleViewAllCritical}>View all critical assets...</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Asset Distribution and Maintenance Schedule -->
+                <div class="bottom-section">
+                    <!-- Asset Health by Category -->
+                    <div class="compliance-class-card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:layers" size="x-small"></lightning-icon>
+                            <span class="card-title">Asset Health by Category</span>
+                        </div>
+                        <div class="compliance-list">
+                            <template for:each={assetHealthByCategory} for:item="item">
+                                <div key={item.id} class="compliance-item">
+                                    <div class="compliance-item-header">
+                                        <span class="class-name">{item.categoryName}</span>
+                                        <span class="compliance-percentage" data-status={item.healthStatus}>
+                                            {item.healthPercentage}
+                                            <template if:true={item.improving}>
+                                                <lightning-icon icon-name="utility:arrowup" size="xx-small" class="trend-icon"></lightning-icon>
+                                            </template>
+                                        </span>
+                                    </div>
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-bar" data-status={item.healthStatus} data-width={item.healthPercentage}></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Maintenance Schedule -->
+                    <div class="pm-schedules-card">
+                        <div class="card-header">
+                            <span class="card-title">Upcoming Maintenance Schedule</span>
+                            <div class="search-box">
+                                <lightning-input 
+                                    type="search" 
+                                    placeholder="Search assets..."
+                                    onchange={handleMaintenanceSearch}
+                                    class="pm-search-input">
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="pm-table-container">
+                            <table class="pm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Number</th>
+                                        <th>Asset Name</th>
+                                        <th>Location</th>
+                                        <th>Next Maintenance</th>
+                                        <th>Condition</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={maintenanceSchedule} for:item="maintenance">
+                                        <tr key={maintenance.id}>
+                                            <td>
+                                                <a href="#" class="pm-link" data-id={maintenance.id} onclick={handleMaintenanceAssetClick}>
+                                                    {maintenance.assetNumber}
+                                                </a>
+                                            </td>
+                                            <td>{maintenance.assetName}</td>
+                                            <td>{maintenance.location}</td>
+                                            <td class={maintenance.dueDateClass}>{maintenance.nextMaintenance}</td>
+                                            <td>
+                                                <span class={maintenance.conditionClass}>{maintenance.condition}</span>
+                                            </td>
+                                            <td class={maintenance.priorityClass}>{maintenance.priority}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </template>
         </div>
     </div>
