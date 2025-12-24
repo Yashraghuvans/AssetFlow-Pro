@@ -1,3 +1,5 @@
+<img src="https://github.com/Yashraghuvans/AssetFlow-Pro/blob/main/Snapshots/cover_image.png"/>
+
 # Enterprise Asset Management System Based on CRM
 
 A comprehensive Salesforce solution for managing asset templates and generating multiple assets from templates. This project includes custom objects, Lightning Web Components, Apex classes, flows, and more.
